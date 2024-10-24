@@ -56,7 +56,7 @@ const ProductGridSingleSeven = ({
                 ) : (
                   ""
                 )}
-                {product.new ? <span className="purple">New</span> : ""}
+                {product.new ? <span className="purple">Nuevo</span> : ""}
               </div>
             ) : (
               ""
@@ -68,7 +68,7 @@ const ProductGridSingleSeven = ({
                   href={product.affiliateLink}
                   rel="noopener noreferrer"
                   target="_blank"
-                  title="Buy now"
+                  title="Comprar ahora"
                 >
                   {" "}
                   <i className="fa fa-shopping-cart"></i>{" "}
@@ -76,7 +76,7 @@ const ProductGridSingleSeven = ({
               ) : product.variation && product.variation.length >= 1 ? (
                 <Link
                   to={`${process.env.PUBLIC_URL}/product/${product.id}`}
-                  title="Select options"
+                  title="Ver opciones"
                 >
                   <i className="fa fa-cog"></i>
                 </Link>
@@ -90,32 +90,19 @@ const ProductGridSingleSeven = ({
                   }
                   disabled={cartItem !== undefined && cartItem.quantity > 0}
                   title={
-                    cartItem !== undefined ? "Added to cart" : "Añadir al carro"
+                    cartItem !== undefined ? "Añadido al carrito" : "Añadir al carrito"
                   }
                 >
                   <i className="fa fa-shopping-cart"></i>
                 </button>
               ) : (
-                <button disabled className="active" title="Out of stock">
+                <button disabled className="active" title="Agotado">
                   <i className="fa fa-shopping-cart"></i>
                 </button>
               )}
 
-              <button onClick={() => setModalShow(true)} title="Quick View">
+              <button onClick={() => setModalShow(true)} title="Vista rápida">
                 <i className="fa fa-eye"></i>
-              </button>
-
-              <button
-                className={compareItem !== undefined ? "active" : ""}
-                disabled={compareItem !== undefined}
-                title={
-                  compareItem !== undefined
-                    ? "Added to compare"
-                    : "Add to compare"
-                }
-                onClick={() => dispatch(addToCompare(product))}
-              >
-                <i className="fa fa-retweet"></i>
               </button>
             </div>
             <div className="pro-wishlist-2">
@@ -124,8 +111,8 @@ const ProductGridSingleSeven = ({
                 disabled={wishlistItem !== undefined}
                 title={
                   wishlistItem !== undefined
-                    ? "Added to wishlist"
-                    : "Add to wishlist"
+                    ? "Añadido a la lista de deseos"
+                    : "Añadir a la lista de deseos"
                 }
                 onClick={() => dispatch(addToWishlist(product))}
               >

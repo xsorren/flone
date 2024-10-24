@@ -167,7 +167,7 @@ function ProductModal({ product, currency, discountedPrice, finalProductPrice, f
                     })}
                   </div>
                 </div>
-                <div className="pro-details-size">
+                {/* <div className="pro-details-size">
                   <span>Size</span>
                   <div className="pro-details-size-content">
                     {product.variation &&
@@ -205,7 +205,7 @@ function ProductModal({ product, currency, discountedPrice, finalProductPrice, f
                           : "";
                       })}
                   </div>
-                </div>
+                </div> */}
               </div>
             ) : (
               ""
@@ -218,7 +218,7 @@ function ProductModal({ product, currency, discountedPrice, finalProductPrice, f
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    Buy Now
+                    Comprar ahora
                   </a>
                 </div>
               </div>
@@ -268,10 +268,10 @@ function ProductModal({ product, currency, discountedPrice, finalProductPrice, f
                       disabled={productCartQty >= productStock}
                     >
                       {" "}
-                      Añadir al carro{" "}
+                      Añadir al carrito{" "}
                     </button>
                   ) : (
-                    <button disabled>Out of Stock</button>
+                    <button disabled>Agotado</button>
                   )}
                 </div>
                 <div className="pro-details-wishlist">
@@ -280,26 +280,12 @@ function ProductModal({ product, currency, discountedPrice, finalProductPrice, f
                     disabled={wishlistItem !== undefined}
                     title={
                       wishlistItem !== undefined
-                        ? "Added to wishlist"
-                        : "Add to wishlist"
+                        ? "Añadido a la lista de deseos"
+                        : "Añadir a la lista de deseos"
                     }
                     onClick={() => dispatch(addToWishlist(product))}
                   >
                     <i className="pe-7s-like" />
-                  </button>
-                </div>
-                <div className="pro-details-compare">
-                  <button
-                    className={compareItem !== undefined ? "active" : ""}
-                    disabled={compareItem !== undefined}
-                    title={
-                      compareItem !== undefined
-                        ? "Added to compare"
-                        : "Add to compare"
-                    }
-                    onClick={() => dispatch(addToCompare(product))}
-                  >
-                    <i className="pe-7s-shuffle" />
                   </button>
                 </div>
               </div>

@@ -44,7 +44,7 @@ const ProductGridSingleSix = ({
               ) : (
                 ""
               )}
-              {product.new ? <span className="purple">New</span> : ""}
+              {product.new ? <span className="purple">Nuevo</span> : ""}
             </div>
           ) : (
             ""
@@ -85,8 +85,8 @@ const ProductGridSingleSix = ({
                 disabled={wishlistItem !== undefined}
                 title={
                   wishlistItem !== undefined
-                    ? "Added to wishlist"
-                    : "Add to wishlist"
+                    ? "Añadido a la lista de deseos"
+                    : "Añadir a la lista de deseos"
                 }
                 onClick={() => dispatch(addToWishlist(product))}
               >
@@ -99,14 +99,14 @@ const ProductGridSingleSix = ({
                   href={product.affiliateLink}
                   rel="noopener noreferrer"
                   target="_blank"
-                  title="Buy now"
+                  title="Comprar ahora"
                 >
                   <i className="pe-7s-cart"></i>
                 </a>
               ) : product.variation && product.variation.length >= 1 ? (
                 <Link
                   to={`${process.env.PUBLIC_URL}/product/${product.id}`}
-                  title="Select option"
+                  title="Ver opciones"
                 >
                   <i className="pe-7s-cart"></i>
                 </Link>
@@ -120,30 +120,16 @@ const ProductGridSingleSix = ({
                   }
                   disabled={cartItem !== undefined && cartItem.quantity > 0}
                   title={
-                    cartItem !== undefined ? "Added to cart" : "Añadir al carro"
+                    cartItem !== undefined ? "Añadido al carrito" : "Añadir al carrito"
                   }
                 >
                   <i className="pe-7s-cart"></i>
                 </button>
               ) : (
-                <button disabled className="active" title="Out of stock">
+                <button disabled className="active" title="Agotado">
                   <i className="pe-7s-cart"></i>
                 </button>
               )}
-            </div>
-            <div className="pro-same-action pro-compare">
-              <button
-                className={compareItem !== undefined ? "active" : ""}
-                disabled={compareItem !== undefined}
-                title={
-                  compareItem !== undefined
-                    ? "Added to compare"
-                    : "Add to compare"
-                }
-                onClick={() => dispatch(addToCompare(product))}
-              >
-                <i className="pe-7s-shuffle" />
-              </button>
             </div>
           </div>
         </div>

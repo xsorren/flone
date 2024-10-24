@@ -96,7 +96,7 @@ const ProductDescriptionInfoSlider = ({
               })}
             </div>
           </div>
-          <div className="pro-details-size">
+{/*          <div className="pro-details-size">
             <span>Size</span>
             <div className="pro-details-size-content">
               {product.variation &&
@@ -129,7 +129,7 @@ const ProductDescriptionInfoSlider = ({
                     : "";
                 })}
             </div>
-          </div>
+          </div>*/}
         </div>
       ) : (
         ""
@@ -142,7 +142,7 @@ const ProductDescriptionInfoSlider = ({
               rel="noopener noreferrer"
               target="_blank"
             >
-              Buy Now
+              Comprar ahora
             </a>
           </div>
         </div>
@@ -190,10 +190,10 @@ const ProductDescriptionInfoSlider = ({
                 disabled={productCartQty >= productStock}
               >
                 {" "}
-                Añadir al carro{" "}
+                Añadir al carrito{" "}
               </button>
             ) : (
-              <button disabled>Out of Stock</button>
+              <button disabled>Agotado</button>
             )}
           </div>
           <div className="pro-details-wishlist">
@@ -202,33 +202,19 @@ const ProductDescriptionInfoSlider = ({
               disabled={wishlistItem !== undefined}
               title={
                 wishlistItem !== undefined
-                  ? "Added to wishlist"
-                  : "Add to wishlist"
+                  ? "Añadido a la lista de deseos"
+                  : "Añadir a la lista de deseos"
               }
               onClick={() => dispatch(addToWishlist(product))}
             >
               <i className="pe-7s-like" />
             </button>
           </div>
-          <div className="pro-details-compare">
-            <button
-              className={compareItem !== undefined ? "active" : ""}
-              disabled={compareItem !== undefined}
-              title={
-                compareItem !== undefined
-                  ? "Added to compare"
-                  : "Add to compare"
-              }
-              onClick={() => dispatch(addToCompare(product))}
-            >
-              <i className="pe-7s-shuffle" />
-            </button>
-          </div>
         </div>
       )}
       {product.category ? (
         <div className="pro-details-meta justify-content-center">
-          <span>Categories :</span>
+          <span>Categorías:</span>
           <ul>
             {product.category.map((single, key) => {
               return (
@@ -246,7 +232,7 @@ const ProductDescriptionInfoSlider = ({
       )}
       {product.tag ? (
         <div className="pro-details-meta justify-content-center">
-          <span>Tags :</span>
+          <span>Etiquetas:</span>
           <ul>
             {product.tag.map((single, key) => {
               return (

@@ -11,14 +11,7 @@ const FooterCopyright = ({ footerLogo, spaceBottomClass, colorClass }) => {
         </Link>
       </div>
       <p style={{ margin: 0 }}>
-        &copy; {new Date().getFullYear()}{" "}
-        <a
-          href="https://hasthemes.com"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          Don Mauricio Materiales - Todos los derechos reservados.
-        </a>
+        &copy; {new Date().getFullYear()}{" "} Don Mauricio Materiales - Todos los derechos reservados.
       </p>
     </div>
   );

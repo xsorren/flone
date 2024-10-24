@@ -35,9 +35,6 @@ const FooterOne = ({
               <div className="footer-list">
                 <ul>
                   <li>
-                    <Link to={process.env.PUBLIC_URL + "/about"}>Sobre nosotros</Link>
-                  </li>
-                  <li>
                     <Link to={process.env.PUBLIC_URL + "#/"}>
                       Ubicación de la tienda
                     </Link>
@@ -45,11 +42,6 @@ const FooterOne = ({
                   <li>
                     <Link to={process.env.PUBLIC_URL + "/contact"}>
                       Contacto
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to={process.env.PUBLIC_URL + "#/"}>
-                      Seguimiento de pedidos
                     </Link>
                   </li>
                 </ul>

@@ -21,8 +21,8 @@ const HomeConstructionMaterials = () => {
         {/* hero slider */}
         <HeroSliderThirtyTwo spaceBottomClass="pb-100" />
         {/* feature icon */}
-        <FeatureIconEight spaceBottomClass="pb-100" />
-        {/* tab product */}
+{/*        <FeatureIconEight spaceBottomClass="pb-100" />
+*/}        {/* tab product */}
         <TabProductNineteen
           spaceTopClass="pt-95"
           spaceBottomClass="pb-100"

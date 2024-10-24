@@ -90,13 +90,13 @@ const MenuCart = () => {
           </div>
           <div className="shopping-cart-btn btn-hover text-center">
             <Link className="default-btn" to={process.env.PUBLIC_URL + "/cart"}>
-              view cart
+              Ver Carrito
             </Link>
             <Link
               className="default-btn"
               to={process.env.PUBLIC_URL + "/checkout"}
             >
-              checkout
+              Proceder al Pago
             </Link>
           </div>
         </Fragment>

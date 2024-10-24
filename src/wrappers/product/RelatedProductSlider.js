@@ -44,7 +44,7 @@ const RelatedProductSlider = ({ spaceBottomClass, category }) => {
     <div className={clsx("related-product-area", spaceBottomClass)}>
       <div className="container">
         <SectionTitle
-          titleText="Related Products"
+          titleText="Productos Relacionados"
           positionClass="text-center"
           spaceClass="mb-50"
         />

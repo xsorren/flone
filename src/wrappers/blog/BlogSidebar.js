@@ -101,7 +101,7 @@ const BlogSidebar = () => {
         </div>
       </div>
       <div className="sidebar-widget mt-35">
-        <h4 className="pro-sidebar-title">Categories</h4>
+        <h4 className="pro-sidebar-title">Categorías</h4>
         <div className="sidebar-widget-list sidebar-widget-list--blog mt-20">
           <ul>
             <li>

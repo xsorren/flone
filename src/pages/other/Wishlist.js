@@ -24,8 +24,8 @@ const Wishlist = () => {
   return (
     <Fragment>
       <SEO
-        titleTemplate="Wishlist"
-        description="Wishlist page of flone react minimalist eCommerce template."
+        titleTemplate="Lista de deseos"
+        description="Página de lista de deseos de la plantilla minimalista de comercio electrónico flone react."
       />
       <LayoutOne >
         {/* breadcrumb */}
@@ -39,18 +39,18 @@ const Wishlist = () => {
           <div className="container">
             {wishlistItems && wishlistItems.length >= 1 ? (
               <Fragment>
-                <h3 className="cart-page-title">Your wishlist items</h3>
+                <h3 className="cart-page-title">Tus artículos en la lista de deseos</h3>
                 <div className="row">
                   <div className="col-12">
                     <div className="table-content table-responsive cart-table-content">
                       <table>
                         <thead>
                           <tr>
-                            <th>Image</th>
-                            <th>Product Name</th>
-                            <th>Unit Price</th>
-                            <th>Añadir al carro</th>
-                            <th>action</th>
+                            <th>Imagen</th>
+                            <th>Nombre del producto</th>
+                            <th>Precio unitario</th>
+                            <th>Añadir al carrito</th>
+                            <th>Acción</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -129,14 +129,14 @@ const Wishlist = () => {
                                       target="_blank"
                                     >
                                       {" "}
-                                      Buy now{" "}
+                                      Comprar ahora{" "}
                                     </a>
                                   ) : wishlistItem.variation &&
                                     wishlistItem.variation.length >= 1 ? (
                                     <Link
                                       to={`${process.env.PUBLIC_URL}/product/${wishlistItem.id}`}
                                     >
-                                      Select option
+                                      Ver opciones
                                     </Link>
                                   ) : wishlistItem.stock &&
                                     wishlistItem.stock > 0 ? (
@@ -156,18 +156,18 @@ const Wishlist = () => {
                                       }
                                       title={
                                         wishlistItem !== undefined
-                                          ? "Added to cart"
-                                          : "Añadir al carro"
+                                          ? "Añadido al carrito"
+                                          : "Añadir al carrito"
                                       }
                                     >
                                       {cartItem !== undefined &&
                                       cartItem.quantity > 0
-                                        ? "Added"
-                                        : "Añadir al carro"}
+                                        ? "Añadido"
+                                        : "Añadir al carrito"}
                                     </button>
                                   ) : (
                                     <button disabled className="active">
-                                      Out of stock
+                                      Agotado
                                     </button>
                                   )}
                                 </td>
@@ -197,12 +197,12 @@ const Wishlist = () => {
                         <Link
                           to={process.env.PUBLIC_URL + "/shop-grid-standard"}
                         >
-                          Continue Shopping
+                          Continuar comprando
                         </Link>
                       </div>
                       <div className="cart-clear">
                         <button onClick={() => dispatch(deleteAllFromWishlist())}>
-                          Clear Wishlist
+                          Vaciar lista de deseos
                         </button>
                       </div>
                     </div>
@@ -217,9 +217,9 @@ const Wishlist = () => {
                       <i className="pe-7s-like"></i>
                     </div>
                     <div className="item-empty-area__text">
-                      No items found in wishlist <br />{" "}
+                      No se encontraron artículos en la lista de deseos <br />{" "}
                       <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
-                        Add Items
+                        Añadir artículos
                       </Link>
                     </div>
                   </div>

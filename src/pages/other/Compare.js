@@ -104,7 +104,7 @@ const Compare = () => {
                                       <Link
                                         to={`${process.env.PUBLIC_URL}/product/${compareItem.id}`}
                                       >
-                                        Select Option
+                                        Ver opciones
                                       </Link>
                                     ) : compareItem.stock &&
                                       compareItem.stock > 0 ? (

@@ -142,7 +142,7 @@ const ProductDescriptionInfo = ({
               rel="noopener noreferrer"
               target="_blank"
             >
-              Buy Now
+              Comprar ahora
             </a>
           </div>
         </div>
@@ -190,10 +190,10 @@ const ProductDescriptionInfo = ({
                 disabled={productCartQty >= productStock}
               >
                 {" "}
-                Añadir al carro{" "}
+                Añadir al carrito{" "}
               </button>
             ) : (
-              <button disabled>Out of Stock</button>
+              <button disabled>Agotado</button>
             )}
           </div>
           <div className="pro-details-wishlist">
@@ -202,33 +202,19 @@ const ProductDescriptionInfo = ({
               disabled={wishlistItem !== undefined}
               title={
                 wishlistItem !== undefined
-                  ? "Added to wishlist"
-                  : "Add to wishlist"
+                  ? "Añadido a la lista de deseos"
+                  : "Añadir a la lista de deseos"
               }
               onClick={() => dispatch(addToWishlist(product))}
             >
               <i className="pe-7s-like" />
             </button>
           </div>
-          <div className="pro-details-compare">
-            <button
-              className={compareItem !== undefined ? "active" : ""}
-              disabled={compareItem !== undefined}
-              title={
-                compareItem !== undefined
-                  ? "Added to compare"
-                  : "Add to compare"
-              }
-              onClick={() => dispatch(addToCompare(product))}
-            >
-              <i className="pe-7s-shuffle" />
-            </button>
-          </div>
         </div>
       )}
       {product.category ? (
         <div className="pro-details-meta">
-          <span>Categories :</span>
+          <span>Categorías :</span>
           <ul>
             {product.category.map((single, key) => {
               return (
@@ -246,7 +232,7 @@ const ProductDescriptionInfo = ({
       )}
       {product.tag ? (
         <div className="pro-details-meta">
-          <span>Tags :</span>
+          <span>Etiquetas :</span>
           <ul>
             {product.tag.map((single, key) => {
               return (

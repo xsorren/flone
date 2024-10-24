@@ -65,8 +65,8 @@ const ProductGridSingle = ({
                 disabled={wishlistItem !== undefined}
                 title={
                   wishlistItem !== undefined
-                    ? "Added to wishlist"
-                    : "Add to wishlist"
+                    ? "Añadido a la lista de deseos"
+                    : "Añadir a la lista de deseos"
                 }
                 onClick={() => dispatch(addToWishlist(product))}
               >
@@ -81,11 +81,11 @@ const ProductGridSingle = ({
                   target="_blank"
                 >
                   {" "}
-                  Buy now{" "}
+                  Comprar ahora{" "}
                 </a>
               ) : product.variation && product.variation.length >= 1 ? (
                 <Link to={`${process.env.PUBLIC_URL}/product/${product.id}`}>
-                  Select Option
+                  Ver opciones
                 </Link>
               ) : product.stock && product.stock > 0 ? (
                 <button
@@ -97,23 +97,23 @@ const ProductGridSingle = ({
                   }
                   disabled={cartItem !== undefined && cartItem.quantity > 0}
                   title={
-                    cartItem !== undefined ? "Added to cart" : "Añadir al carro"
+                    cartItem !== undefined ? "Añadido al carrito" : "Añadir al carrito"
                   }
                 >
                   {" "}
                   <i className="pe-7s-cart"></i>{" "}
                   {cartItem !== undefined && cartItem.quantity > 0
-                    ? "Added"
-                    : "Añadir al carro"}
+                    ? "Añadido"
+                    : "Añadir al carrito"}
                 </button>
               ) : (
                 <button disabled className="active">
-                  Out of Stock
+                  Agotado
                 </button>
               )}
             </div>
             <div className="pro-same-action pro-quickview">
-              <button title="Quick View" onClick={() => setModalShow(true)}>
+              <button title="Vista rápida" onClick={() => setModalShow(true)}>
                 <i className="pe-7s-look" />
               </button>
             </div>

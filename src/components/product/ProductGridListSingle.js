@@ -66,8 +66,8 @@ const ProductGridListSingle = ({
                   disabled={wishlistItem !== undefined}
                   title={
                     wishlistItem !== undefined
-                      ? "Added to wishlist"
-                      : "Add to wishlist"
+                      ? "Añadido a la lista de deseos"
+                      : "Añadir a la lista de deseos"
                   }
                   onClick={() => dispatch(addToWishlist(product))}
                 >
@@ -82,11 +82,11 @@ const ProductGridListSingle = ({
                     target="_blank"
                   >
                     {" "}
-                    Buy now{" "}
+                    Comprar ahora{" "}
                   </a>
                 ) : product.variation && product.variation.length >= 1 ? (
                   <Link to={`${process.env.PUBLIC_URL}/product/${product.id}`}>
-                    Select Option
+                    Ver opciones
                   </Link>
                 ) : product.stock && product.stock > 0 ? (
                   <button
@@ -98,23 +98,23 @@ const ProductGridListSingle = ({
                     }
                     disabled={cartItem !== undefined && cartItem.quantity > 0}
                     title={
-                      cartItem !== undefined ? "Added to cart" : "Añadir al carro"
+                      cartItem !== undefined ? "Añadido al carrito" : "Añadir al carrito"
                     }
                   >
                     {" "}
                     <i className="pe-7s-cart"></i>{" "}
                     {cartItem !== undefined && cartItem.quantity > 0
-                      ? "Added"
-                      : "Añadir al carro"}
+                      ? "Añadido"
+                      : "Añadir al carrito"}
                   </button>
                 ) : (
                   <button disabled className="active">
-                    Out of Stock
+                    Agotado
                   </button>
                 )}
               </div>
               <div className="pro-same-action pro-quickview">
-                <button onClick={() => setModalShow(true)} title="Quick View">
+                <button onClick={() => setModalShow(true)} title="Vista rápida">
                   <i className="pe-7s-look" />
                 </button>
               </div>
@@ -228,13 +228,13 @@ const ProductGridListSingle = ({
                         target="_blank"
                       >
                         {" "}
-                        Buy now{" "}
+                        Comprar ahora{" "}
                       </a>
                     ) : product.variation && product.variation.length >= 1 ? (
                       <Link
                         to={`${process.env.PUBLIC_URL}/product/${product.id}`}
                       >
-                        Select Option
+                        Ver opciones
                       </Link>
                     ) : product.stock && product.stock > 0 ? (
                       <button
@@ -249,19 +249,19 @@ const ProductGridListSingle = ({
                         }
                         title={
                           cartItem !== undefined
-                            ? "Added to cart"
-                            : "Añadir al carro"
+                            ? "Añadido al carrito"
+                            : "Añadir al carrito"
                         }
                       >
                         {" "}
                         <i className="pe-7s-cart"></i>{" "}
                         {cartItem !== undefined && cartItem.quantity > 0
-                          ? "Added"
-                          : "Añadir al carro"}
+                          ? "Añadido"
+                          : "Añadir al carrito"}
                       </button>
                     ) : (
                       <button disabled className="active">
-                        Out of Stock
+                        Agotado
                       </button>
                     )}
                   </div>
@@ -272,26 +272,12 @@ const ProductGridListSingle = ({
                       disabled={wishlistItem !== undefined}
                       title={
                         wishlistItem !== undefined
-                          ? "Added to wishlist"
-                          : "Add to wishlist"
+                          ? "Añadido a la lista de deseos"
+                          : "Añadir a la lista de deseos"
                       }
                       onClick={() => dispatch(addToWishlist(product))}
                     >
                       <i className="pe-7s-like" />
-                    </button>
-                  </div>
-                  <div className="shop-list-compare ml-10">
-                    <button
-                      className={compareItem !== undefined ? "active" : ""}
-                      disabled={compareItem !== undefined}
-                      title={
-                        compareItem !== undefined
-                          ? "Added to compare"
-                          : "Add to compare"
-                      }
-                      onClick={() => dispatch(addToCompare(product))}
-                    >
-                      <i className="pe-7s-shuffle" />
                     </button>
                   </div>
                 </div>
