@@ -31,22 +31,26 @@ const ProductGridSingleTen = ({
     <Fragment>
         <div className={clsx("product-wrap-10", spaceBottomClass, colorClass, productGridStyleClass)}>
           <div className="product-img">
-            <Link to={process.env.PUBLIC_URL + "/product/" + product.id}>
-              <img
-                className="default-img"
-                src={process.env.PUBLIC_URL + product.image[0]}
-                alt=""
-              />
-              {product.image.length > 1 ? (
+            {product.image && product.image.length > 0 ? (
+              <Link to={process.env.PUBLIC_URL + "/product/" + product.id}>
                 <img
-                  className="hover-img"
-                  src={process.env.PUBLIC_URL + product.image[1]}
+                  className="default-img"
+                  src={process.env.PUBLIC_URL + product.image[0]}
                   alt=""
                 />
-              ) : (
-                ""
-              )}
-            </Link>
+                {product.image.length > 1 ? (
+                  <img
+                    className="hover-img"
+                    src={process.env.PUBLIC_URL + product.image[1]}
+                    alt=""
+                  />
+                ) : (
+                  ""
+                )}
+              </Link>
+            ) : (
+              <div className="no-image">No image available</div>
+            )}
             {product.discount || product.new ? (
               <div className="product-img-badges">
                 {product.discount ? <span>-{product.discount}%</span> : ""}

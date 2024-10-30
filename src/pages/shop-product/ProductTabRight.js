@@ -25,8 +25,8 @@ const ProductTabRight = () => {
         {/* breadcrumb */}
         <Breadcrumb 
           pages={[
-            {label: "Home", path: process.env.PUBLIC_URL + "/" },
-            {label: "Shop Product", path: process.env.PUBLIC_URL + pathname }
+            {label: "Inicio", path: process.env.PUBLIC_URL + "/" },
+            {label: "Ver Producto", path: process.env.PUBLIC_URL + pathname }
           ]} 
         />
 

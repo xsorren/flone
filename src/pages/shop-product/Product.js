@@ -12,8 +12,8 @@ const Product = () => {
   let { pathname } = useLocation();
   let { id } = useParams();
   const { products } = useSelector((state) => state.product);
-  const product = products.find(product => product.id === id);
-  
+  const product = products.find(product => product.id == id);
+  console.log(id, products, product)
 
   return (
     <Fragment>
@@ -26,8 +26,8 @@ const Product = () => {
         {/* breadcrumb */}
         <Breadcrumb 
           pages={[
-            {label: "Home", path: process.env.PUBLIC_URL + "/" },
-            {label: "Shop Product", path: process.env.PUBLIC_URL + pathname }
+            {label: "Inicio", path: process.env.PUBLIC_URL + "/" },
+            {label: "Ver Producto", path: process.env.PUBLIC_URL + pathname }
           ]} 
         />
 

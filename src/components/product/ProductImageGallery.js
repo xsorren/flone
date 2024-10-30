@@ -10,10 +10,10 @@ import Swiper, { SwiperSlide } from "../../components/swiper";
 const ProductImageGallery = ({ product }) => {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [index, setIndex] = useState(-1);
-  const slides = product?.image.map((img, i) => ({
+  const slides = product?.image?.map((img, i) => ({
       src: process.env.PUBLIC_URL + img,
       key: i,
-  }));
+  })) || [];
 
   // swiper slider settings
   const gallerySwiperParams = {

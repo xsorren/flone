@@ -38,11 +38,6 @@ const TabProductNineteen = ({
                 <h4>Mas vendidos</h4>
               </Nav.Link>
             </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="saleItems">
-                <h4>Ofertas</h4>
-              </Nav.Link>
-            </Nav.Item>
           </Nav>
           <Tab.Content>
             <Tab.Pane eventKey="newArrival">

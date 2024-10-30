@@ -1,5 +1,6 @@
 // src/components/productlist/ProductEditModal.js
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import axiosInstance from '../../utils/axiosInstance'; // Asegúrate de importar la instancia de Axios correctamente
 import { toast } from 'react-toastify'; // Opcional: Para notificaciones
 
