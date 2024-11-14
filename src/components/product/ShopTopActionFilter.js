@@ -18,7 +18,7 @@ const ShopTopActionFilter = ({
             <select
               onChange={e => getFilterSortParams("filterSort", e.target.value)}
             >
-              <option value="default">Default</option>
+              <option value="default">Predeterminado</option>
               <option value="priceHighToLow">Precio - Mayor a Menor</option>
               <option value="priceLowToHigh">Precio - Menor a Mayor</option>
             </select>

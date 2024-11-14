@@ -56,13 +56,11 @@ const MobileMenu = () => {
       <div className="offcanvas-wrapper">
         <div className="offcanvas-inner-content">
           {/* mobile search */}
-          <MobileMenuSearch />
 
           {/* mobile nav menu */}
           <MobileNavMenu />
 
           {/* mobile language and currency */}
-          <MobileLangCurChange />
 
           {/* mobile widgets */}
           <MobileWidgets />

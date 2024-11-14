@@ -81,8 +81,9 @@ const Wishlist = () => {
                                     <img
                                       className="img-fluid"
                                       src={
-                                        process.env.PUBLIC_URL +
-                                        wishlistItem.image[0]
+                                        wishlistItem.image && wishlistItem.image.length > 0
+                                          ? process.env.PUBLIC_URL + wishlistItem.image[0]
+                                          : process.env.PUBLIC_URL + "/assets/img/no-imagen.png"
                                       }
                                       alt=""
                                     />

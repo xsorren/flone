@@ -97,15 +97,15 @@ const Contact = () => {
                       </div>
                       <div className="col-lg-12">
                         <input
-                          name="subject"
-                          placeholder="Asunto*"
+                          name="phone"
+                          placeholder="Teléfono*"
                           type="text"
                         />
                       </div>
                       <div className="col-lg-12">
                         <textarea
                           name="message"
-                          placeholder="Tu mensaje*"
+                          placeholder="Consulta*"
                           defaultValue={""}
                         />
                         <button className="submit" type="submit">

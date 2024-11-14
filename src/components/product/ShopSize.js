@@ -17,7 +17,7 @@ const ShopSize = ({ sizes, getSortParams }) => {
                     setActiveSort(e);
                   }}
                 >
-                  <span className="checkmark" /> All Sizes{" "}
+                  <span className="checkmark" /> Todos los tamaños{" "}
                 </button>
               </div>
             </li>

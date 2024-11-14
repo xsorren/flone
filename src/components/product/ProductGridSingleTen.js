@@ -49,8 +49,11 @@ const ProductGridSingleTen = ({
                 )}
               </Link>
             ) : (
-              <div className="no-image">No image available</div>
-            )}
+              <img
+              className="default-img"
+              src={process.env.PUBLIC_URL + "/assets/img/no-imagen.png"}
+              alt=""
+            />            )}
             {product.discount || product.new ? (
               <div className="product-img-badges">
                 {product.discount ? <span>-{product.discount}%</span> : ""}

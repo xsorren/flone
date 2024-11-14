@@ -1,7 +1,5 @@
 import PropTypes from "prop-types";
-import clsx from "clsx";
 import { Link } from "react-router-dom";
-import FooterCopyright from "../../components/footer/FooterCopyright";
 
 const FooterOne = ({
   backgroundColorClass,
@@ -11,87 +9,86 @@ const FooterOne = ({
   spaceRightClass,
   containerClass,
   extraFooterClass,
-  sideMenu
+  sideMenu,
 }) => {
   return (
     <footer
-      className={clsx(
-        "footer-area",
-        backgroundColorClass,
-        spaceTopClass,
-        spaceBottomClass,
-        extraFooterClass,
-        spaceLeftClass,
-        spaceRightClass
-      )}
+      className={`footer-area ${
+        backgroundColorClass ? backgroundColorClass : ""
+      } ${spaceTopClass ? spaceTopClass : ""} ${
+        spaceBottomClass ? spaceBottomClass : ""
+      } ${extraFooterClass ? extraFooterClass : ""} ${
+        spaceLeftClass ? spaceLeftClass : ""
+      } ${spaceRightClass ? spaceRightClass : ""}`}
+      style={{
+        padding: "20px",
+        fontFamily: "inherit", // Asegurando que se utiliza la fuente de antes
+      }}
     >
-      <div className={`${containerClass ? containerClass : "container"}`}>
-        <div className="row" style={{ display: "flex", alignItems: "center", justifyContent: "space-around" }}>
-          <div style={{ flex: "1", marginRight: "15px", textAlign: "center" }}>
-            <div className="footer-widget mb-30">
-              <div className="footer-title">
-                <h3>SOBRE NOSOTROS</h3>
-              </div>
-              <div className="footer-list">
-                <ul>
-                  <li>
-                    <Link to={process.env.PUBLIC_URL + "#/"}>
-                      Ubicación de la tienda
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to={process.env.PUBLIC_URL + "/contact"}>
-                      Contacto
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+      <div className={containerClass ? containerClass : "container"}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
+          <div style={{ flex: "1 1 300px", margin: "15px" }}>
+            <h3 style={{ fontFamily: "inherit" }}>SOBRE NOSOTROS</h3>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              <li>
+                <Link to={process.env.PUBLIC_URL + "#/"}>
+                  Ubicación de la tienda
+                </Link>
+              </li>
+              <li>
+                <Link to={process.env.PUBLIC_URL + "/contact"}>Contacto</Link>
+              </li>
+            </ul>
+          </div>
+          <div style={{ flex: "1 1 300px", margin: "15px" }}>
+            {/* Logo del footer */}
+            <div>
+              <img
+                src="/assets/img/logo/logo.png"
+                alt="Logo"
+                style={{ maxWidth: "100%", height: "auto" }}
+              />
             </div>
           </div>
-          <div style={{ flex: "1", textAlign: "center" }}>
-            {/* footer copyright */}
-            <FooterCopyright
-              footerLogo="/assets/img/logo/logo.png"
-              spaceBottomClass="mb-30"
-            />
-          </div>
-          <div style={{ flex: "1", marginLeft: "15px", textAlign: "center" }}>
-            <div className="footer-widget mb-30">
-              <div className="footer-title">
-                <h3>SÍGUENOS</h3>
-              </div>
-              <div className="footer-list">
-                <ul>
-                  <li>
-                    <a
-                      href="//www.facebook.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Facebook
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="//www.instagram.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Instagram
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="//www.youtube.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      YouTube
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
+          <div style={{ flex: "1 1 300px", margin: "15px" }}>
+            <h3 style={{ fontFamily: "inherit" }}>SÍGUENOS</h3>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              <li>
+                <a
+                  href="//www.facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Facebook
+                </a>
+              </li>
+              <li>
+                <a
+                  href="//www.instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Instagram
+                </a>
+              </li>
+              <li>
+                <a
+                  href="//www.youtube.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  YouTube
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -107,7 +104,7 @@ FooterOne.propTypes = {
   spaceBottomClass: PropTypes.string,
   spaceTopClass: PropTypes.string,
   spaceLeftClass: PropTypes.string,
-  spaceRightClass: PropTypes.string
+  spaceRightClass: PropTypes.string,
 };
 
 export default FooterOne;

@@ -10,7 +10,6 @@ import ProductModal from "./ProductModal";
 import { addToCart } from "../../store/slices/cart-slice";
 import { addToWishlist } from "../../store/slices/wishlist-slice";
 import { addToCompare } from "../../store/slices/compare-slice";
-import "./ProductGridListSingle.css"; // Asegúrate de crear este archivo CSS
 
 const ProductGridListSingle = ({
   product,
@@ -39,7 +38,13 @@ const ProductGridListSingle = ({
         />
       );
     } else {
-      return <div className="image-skeleton"></div>;
+      return (
+        <img
+          className={isDefault ? "default-img" : "hover-img"}
+          src={process.env.PUBLIC_URL + "/assets/img/no-imagen.png"}
+          alt="No disponible"
+        />
+      );
     }
   };
 

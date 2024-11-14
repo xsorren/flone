@@ -33,10 +33,16 @@ const ProductGridSingle = ({
             {product.image && product.image.length > 0 ? (
               <img
                 className="default-img"
-                src={process.env.PUBLIC_URL + product.image[0]}
+                src={process.env.PUBLIC_URL + (product.image[0] || "/assets/img/no-imagen.png")}
                 alt=""
               />
-            ) : null}
+            ) : (
+              <img
+                className="default-img"
+                src={process.env.PUBLIC_URL + "/assets/img/no-imagen.png"}
+                alt=""
+              />
+            )}
             {product.image && product.image.length > 1 ? (
               <img
                 className="hover-img"

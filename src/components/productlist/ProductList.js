@@ -209,7 +209,7 @@ const ProductList = () => {
     };
 
     const handleViewProduct = (id) => {
-        navigate(`/products/${id}`);
+        navigate(`/product/${id}`);
     };
 
     return (
@@ -270,10 +270,10 @@ const ProductList = () => {
                                         <Button className="edit" onClick={() => handleEditProduct(product)}>
                                             Editar
                                         </Button>
-                                        <Button className="delete" onClick={() => handleDeleteProduct(product._id)}>
+                                        <Button className="delete" onClick={() => handleDeleteProduct(product.id)}>
                                             Eliminar
                                         </Button>
-                                        <Button className="view" onClick={() => handleViewProduct(product._id)}>
+                                        <Button className="view" onClick={() => handleViewProduct(product.id)}>
                                             Ver
                                         </Button>
                                     </>
