@@ -6,7 +6,6 @@ import { getProductCartQuantity } from "../../helpers/product";
 import Rating from "./sub-components/ProductRating";
 import { addToCart } from "../../store/slices/cart-slice";
 import { addToWishlist } from "../../store/slices/wishlist-slice";
-import { addToCompare } from "../../store/slices/compare-slice";
 
 const ProductDescriptionInfoSlider = ({
   product,
@@ -16,7 +15,7 @@ const ProductDescriptionInfoSlider = ({
   finalProductPrice,
   cartItems,
   wishlistItem,
-  compareItem,
+  
 }) => {
   const dispatch = useDispatch();
   const [selectedProductColor, setSelectedProductColor] = useState(
@@ -269,7 +268,7 @@ const ProductDescriptionInfoSlider = ({
 
 ProductDescriptionInfoSlider.propTypes = {
   cartItems: PropTypes.array,
-  compareItem: PropTypes.shape({}),
+  
   currency: PropTypes.shape({}),
   discountedPrice: PropTypes.number,
   finalDiscountedPrice: PropTypes.number,

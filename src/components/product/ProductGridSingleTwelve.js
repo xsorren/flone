@@ -7,14 +7,12 @@ import { getDiscountPrice } from "../../helpers/product";
 import ProductModal from "./ProductModal";
 import { addToCart } from "../../store/slices/cart-slice";
 import { addToWishlist } from "../../store/slices/wishlist-slice";
-import { addToCompare } from "../../store/slices/compare-slice";
 
 const ProductGridSingleTwo = ({
     product,
     currency,
     cartItem,
     wishlistItem,
-    compareItem,
     spaceBottomClass,
     colorClass,
     titlePriceClass
@@ -157,7 +155,6 @@ const ProductGridSingleTwo = ({
                 finalProductPrice={finalProductPrice}
                 finalDiscountedPrice={finalDiscountedPrice}
                 wishlistItem={wishlistItem}
-                compareItem={compareItem}
             />
         </Fragment>
     );
@@ -165,7 +162,6 @@ const ProductGridSingleTwo = ({
 
 ProductGridSingleTwo.propTypes = {
     cartItem: PropTypes.shape({}),
-    compareItem: PropTypes.shape({}),
     wishlistItem: PropTypes.shape({}),
     currency: PropTypes.shape({}),
     product: PropTypes.shape({}),

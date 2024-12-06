@@ -40,7 +40,6 @@ const ProductSliderFive = ({
 }
   const { cartItems } = useSelector((state) => state.cart);
   const { wishlistItems } = useSelector((state) => state.wishlist);
-  const { compareItems } = useSelector((state) => state.compare);
   const prods = getProducts(products, category, type, 6)
 
   if(!prods?.length) return <p>No Products Found</p>
@@ -61,11 +60,6 @@ const ProductSliderFive = ({
               wishlistItem={
                 wishlistItems.find(
                   (wishlistItem) => wishlistItem.id === product.id
-                )
-              }
-              compareItem={
-                compareItems.find(
-                  (compareItem) => compareItem.id === product.id
                 )
               }
             />

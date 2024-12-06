@@ -18,19 +18,20 @@ const HomeConstructionMaterials = () => {
         headerContainerClass="container"
         headerPaddingClass="header-padding-1"
       >
-        {/* hero slider */}
+
         <HeroSliderThirtyTwo spaceBottomClass="pb-100" />
-        {/* feature icon */}
-{/*        <FeatureIconEight spaceBottomClass="pb-100" />
-*/}        {/* tab product */}
+
         <TabProductNineteen
           spaceTopClass="pt-95"
           spaceBottomClass="pb-100"
           category="furniture"
           productGridStyleClass="product-wrap-10--style2"
         />
+        
         <CtaTwo spaceTopClass="pt-120" spaceBottomClass="pb-120" />
+          
         <BrandLogoSliderFour spaceBottomClass="pb-50" spaceTopClass="pt-50" />
+      
       </LayoutOne>
     </Fragment>
   );
