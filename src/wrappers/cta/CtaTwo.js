@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
-
 const CtaTwo = ({ spaceTopClass, spaceBottomClass }) => {
   return (
     <div
@@ -17,16 +16,16 @@ const CtaTwo = ({ spaceTopClass, spaceBottomClass }) => {
           <div className="col-lg-6 ms-auto me-auto">
             <div className="cta-content text-center">
               <h2 className="title">
-                Titulo <br /> Sub titulo
+                Calidad en Materiales de Construcción
               </h2>
               <p className="text">
-                Texto
+              Encuentra todo lo que necesitas para tus proyectos.
               </p>
               <Link
                 className="cta-btn"
                 to={process.env.PUBLIC_URL + "/shop-grid-standard"}
               >
-                COMPRAR AHORA
+                VER PRODUCTOS
               </Link>
             </div>
           </div>

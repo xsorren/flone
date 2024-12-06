@@ -1,4 +1,4 @@
-// src/components/ProductEditModal.js
+// src/components/ProductCreateModal.js
 import React, { useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 // Styled Components
 const ModalOverlay = styled.div`
+  /* Estilos similares al modal de edición */
   position: fixed;
   top: 0;
   left: 0;
@@ -19,6 +20,7 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
+  /* Estilos similares al modal de edición */
   background-color: #fff;
   padding: 20px;
   border-radius: 5px;
@@ -53,12 +55,6 @@ const Button = styled.button`
   &:hover {
     background-color: #40a9ff;
   }
-  &.delete {
-    background-color: #ff4d4f;
-    &:hover {
-      background-color: #ff7875;
-    }
-  }
   &.cancel {
     background-color: #d9d9d9;
     color: #000;
@@ -68,50 +64,24 @@ const Button = styled.button`
   }
 `;
 
-const ImageContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-`;
-
-const ImageItem = styled.div`
-  position: relative;
-`;
-
-const DeleteImageButton = styled.button`
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: #ff4d4f;
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  padding: 2px 5px;
-  cursor: pointer;
-  &:hover {
-    background-color: #ff7875;
-  }
-`;
-
-const ProductEditModal = ({ product, onClose }) => {
+const ProductCreateModal = ({ onClose, refreshProducts }) => {
   const [formData, setFormData] = useState({
-    code: product.code || '',
-    batch: product.batch || '',
-    name: product.name || '',
-    stock: product.stock || 0,
-    purchaseCost: product.purchaseCost || 0,
-    totalPrice: product.totalPrice || 0,
-    price: product.price || 0,
-    discount: product.discount || 0,
-    shortDescription: product.shortDescription || '',
-    category: product.category || [],
-    tag: product.tag || [],
-    affiliateLink: product.affiliateLink || '',
+    code: '',
+    batch: '',
+    name: '',
+    stock: 0,
+    purchaseCost: 0,
+    totalPrice: 0,
+    price: 0,
+    discount: 0,
+    shortDescription: '',
+    category: [],
+    tag: [],
+    affiliateLink: '',
     // Añade otros campos si es necesario
   });
 
   const [images, setImages] = useState([]);
-  const [currentImages, setCurrentImages] = useState(product.images || []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -129,62 +99,37 @@ const ProductEditModal = ({ product, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Actualizar producto
-      await axiosInstance.put(`/api/products/${product._id}`, formData);
-      toast.success('Producto actualizado correctamente');
+      // Crear producto
+      const resProduct = await axiosInstance.post('/api/products', formData);
+      const productId = resProduct.data.product._id;
 
-      // Subir imágenes
+      // Subir imágenes si las hay
       if (images.length > 0) {
         const imageData = new FormData();
         images.forEach((image) => {
           imageData.append('images', image);
         });
 
-        const res = await axiosInstance.post(`/api/products/${product._id}/images`, imageData, {
+        await axiosInstance.post(`/api/products/${productId}/images`, imageData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-
-        // Actualizar imágenes actuales con las nuevas
-        setCurrentImages(res.data.images);
-        toast.success('Imágenes subidas correctamente');
       }
 
+      toast.success('Producto creado correctamente');
       onClose();
+      refreshProducts(); // Refresca la lista de productos en el componente padre
     } catch (err) {
       console.error(err);
-      toast.error('Error al actualizar el producto');
-    }
-  };
-
-  const handleDeleteProduct = async () => {
-    try {
-      await axiosInstance.delete(`/api/products/${product._id}`);
-      toast.success('Producto eliminado correctamente');
-      onClose();
-    } catch (err) {
-      console.error(err);
-      toast.error('Error al eliminar el producto');
-    }
-  };
-
-  // Función para eliminar una imagen
-  const handleDeleteImage = async (imageId) => {
-    try {
-      await axiosInstance.delete(`/api/products/${product._id}/images/${imageId}`);
-      setCurrentImages(currentImages.filter((img) => img._id !== imageId));
-      toast.success('Imagen eliminada correctamente');
-    } catch (err) {
-      console.error(err);
-      toast.error('Error al eliminar la imagen');
+      toast.error('Error al crear el producto');
     }
   };
 
   return (
     <ModalOverlay>
       <ModalContent>
-        <h3>Editar Producto</h3>
+        <h3>Crear Nuevo Producto</h3>
         <Form onSubmit={handleSubmit}>
           <Input
             type="text"
@@ -273,40 +218,13 @@ const ProductEditModal = ({ product, onClose }) => {
           />
           {/* Añade más campos según sea necesario */}
 
-          <div className="current-images">
-            <h4>Imágenes Actuales:</h4>
-            {currentImages.length > 0 ? (
-              <ImageContainer>
-                {currentImages.map((img) => (
-                  <ImageItem key={img._id}>
-                    <img
-                      src={img.data} // Usamos 'img.data' para mostrar la imagen
-                      alt={`Imagen`}
-                    />
-                    <DeleteImageButton
-                      type="button"
-                      onClick={() => handleDeleteImage(img._id)}
-                    >
-                      &times;
-                    </DeleteImageButton>
-                  </ImageItem>
-                ))}
-              </ImageContainer>
-            ) : (
-              <p>No hay imágenes actualmente.</p>
-            )}
-          </div>
-
           <div className="upload-images">
-            <h4>Subir Nuevas Imágenes:</h4>
+            <h4>Subir Imágenes:</h4>
             <Input type="file" multiple accept="image/*" onChange={handleImagesChange} />
           </div>
 
           <div style={{ marginTop: '10px' }}>
-            <Button type="submit">Guardar Cambios</Button>
-            <Button type="button" className="delete" onClick={handleDeleteProduct}>
-              Eliminar Producto
-            </Button>
+            <Button type="submit">Crear Producto</Button>
             <Button type="button" className="cancel" onClick={onClose}>
               Cancelar
             </Button>
@@ -317,4 +235,4 @@ const ProductEditModal = ({ product, onClose }) => {
   );
 };
 
-export default ProductEditModal;
+export default ProductCreateModal;
