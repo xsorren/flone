@@ -40,18 +40,18 @@ const ShopGridStandard = () => {
     }
 
     useEffect(() => {
-        let sortedProducts = getSortedProducts(products, sortType, sortValue);
-        const filterSortedProducts = getSortedProducts(sortedProducts, filterSortType, filterSortValue);
-        sortedProducts = filterSortedProducts;
-        setSortedProducts(sortedProducts);
-        setCurrentData(sortedProducts.slice(offset, offset + pageLimit));
+        let sorted = getSortedProducts(products, sortType, sortValue);
+        const filterSortedProducts = getSortedProducts(sorted, filterSortType, filterSortValue);
+        sorted = filterSortedProducts;
+        setSortedProducts(sorted);
+        setCurrentData(sorted.slice(offset, offset + pageLimit));
     }, [offset, products, sortType, sortValue, filterSortType, filterSortValue ]);
 
     return (
         <Fragment>
             <SEO
                 titleTemplate="Shop Page"
-                description="Shop page of flone react minimalist eCommerce template."
+                description="Shop page"
             />
 
             <LayoutOne>
@@ -99,6 +99,5 @@ const ShopGridStandard = () => {
         </Fragment>
     )
 }
-
 
 export default ShopGridStandard;

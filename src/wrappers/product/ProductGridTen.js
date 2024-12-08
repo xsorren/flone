@@ -13,16 +13,11 @@ const ProductGridTen = ({
   limit
 }) => {
   const { products } = useSelector((state) => state.product);
-  const currency = {
-    currencySymbol: "$",
-    currencyName: "USD",
-    currencyRate: 1
-}
   const { cartItems } = useSelector((state) => state.cart);
   const { wishlistItems } = useSelector((state) => state.wishlist);
-  
+
   const prods = getProducts(products, category, type, limit);
-  
+
   return (
     <Fragment>
       {prods?.map((product) => {
@@ -33,16 +28,8 @@ const ProductGridTen = ({
               colorClass={colorClass}
               productGridStyleClass={productGridStyleClass}
               product={product}
-              currency={currency}
-              cartItem={
-                cartItems.find((cartItem) => cartItem.id === product.id)
-              }
-              wishlistItem={
-                wishlistItems.find(
-                  (wishlistItem) => wishlistItem.id === product.id
-                )
-              }
-              
+              cartItem={cartItems.find((cartItem) => cartItem.id === product.id)}
+              wishlistItem={wishlistItems.find((wishlistItem) => wishlistItem.id === product.id)}
             />
           </div>
         );
@@ -59,6 +46,5 @@ ProductGridTen.propTypes = {
   type: PropTypes.string,
   limit: PropTypes.number
 };
-
 
 export default ProductGridTen;

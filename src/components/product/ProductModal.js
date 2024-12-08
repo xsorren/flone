@@ -9,7 +9,7 @@ import { getProductCartQuantity } from "../../helpers/product";
 import { addToCart } from "../../store/slices/cart-slice";
 import { addToWishlist } from "../../store/slices/wishlist-slice";
 
-function ProductModal({ product, currency, discountedPrice, finalProductPrice, finalDiscountedPrice, show, onHide, wishlistItem }) {
+function ProductModal({ product, show, onHide, wishlistItem }) {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const dispatch = useDispatch();
   const { cartItems } = useSelector((state) => state.cart);
@@ -30,7 +30,6 @@ function ProductModal({ product, currency, discountedPrice, finalProductPrice, f
     selectedProductColor,
     selectedProductSize
   );
-
 
   const gallerySwiperParams = {
     spaceBetween: 10,
@@ -59,249 +58,211 @@ function ProductModal({ product, currency, discountedPrice, finalProductPrice, f
     onHide()
   }
 
+  const hasImages = product.images && product.images.length > 0;
+
   return (
     <Modal show={show} onHide={onCloseModal} className="product-quickview-modal-wrapper">
-    <Modal.Header closeButton></Modal.Header>
+      <Modal.Header closeButton></Modal.Header>
 
-    <div className="modal-body">
-      <div className="row">
-        <div className="col-md-5 col-sm-12 col-xs-12">
-          <div className="product-large-image-wrapper">
-            <Swiper options={gallerySwiperParams}>
-              {product.image &&
-                product.image.map((img, i) => {
-                  return (
+      <div className="modal-body">
+        <div className="row">
+          <div className="col-md-5 col-sm-12 col-xs-12">
+            <div className="product-large-image-wrapper">
+              <Swiper options={gallerySwiperParams}>
+                {hasImages ? (
+                  product.images.map((img, i) => (
                     <SwiperSlide key={i}>
                       <div className="single-image">
                         <img
-                          src={process.env.PUBLIC_URL + img}
+                          src={img.url}
                           className="img-fluid"
                           alt="Product"
                         />
                       </div>
                     </SwiperSlide>
-                  );
-                })}
-            </Swiper>
-          </div>
-          <div className="product-small-image-wrapper mt-15">
-            <Swiper options={thumbnailSwiperParams}>
-              {product.image &&
-                product.image.map((img, i) => {
-                  return (
+                  ))
+                ) : (
+                  <SwiperSlide>
+                    <div className="single-image">
+                      <img
+                        src="/assets/img/no-imagen.png"
+                        className="img-fluid"
+                        alt="No imagen"
+                      />
+                    </div>
+                  </SwiperSlide>
+                )}
+              </Swiper>
+            </div>
+            <div className="product-small-image-wrapper mt-15">
+              <Swiper options={thumbnailSwiperParams}>
+                {hasImages ? (
+                  product.images.map((img, i) => (
                     <SwiperSlide key={i}>
                       <div className="single-image">
                         <img
-                          src={process.env.PUBLIC_URL + img}
+                          src={img.url}
                           className="img-fluid"
                           alt=""
                         />
                       </div>
                     </SwiperSlide>
-                  );
-                })}
-            </Swiper>
+                  ))
+                ) : (
+                  <SwiperSlide>
+                    <div className="single-image">
+                      <img
+                        src="/assets/img/no-imagen.png"
+                        className="img-fluid"
+                        alt="No imagen"
+                      />
+                    </div>
+                  </SwiperSlide>
+                )}
+              </Swiper>
+            </div>
           </div>
-        </div>
-        <div className="col-md-7 col-sm-12 col-xs-12">
-          <div className="product-details-content quickview-content">
-            <h2>{product.name}</h2>
-            <div className="product-details-price">
-              {discountedPrice !== null ? (
-                <Fragment>
-                  <span>
-                    {currency.currencySymbol + finalDiscountedPrice}
-                  </span>{" "}
-                  <span className="old">
-                    {currency.currencySymbol + finalProductPrice}
-                  </span>
-                </Fragment>
-              ) : (
-                <span>{currency.currencySymbol + finalProductPrice} </span>
-              )}
-            </div>
-            {product.rating && product.rating > 0 ? (
-              <div className="pro-details-rating-wrap">
-                <div className="pro-details-rating">
-                  <Rating ratingValue={product.rating} />
-                </div>
-              </div>
-            ) : (
-              ""
-            )}
-            <div className="pro-details-list">
-              <p>{product.shortDescription}</p>
-            </div>
+          <div className="col-md-7 col-sm-12 col-xs-12">
+            <div className="product-details-content quickview-content">
+              <h2>{product.name}</h2>
 
-            {product.variation ? (
-              <div className="pro-details-size-color">
-                <div className="pro-details-color-wrap">
-                  <span>Color</span>
-                  <div className="pro-details-color-content">
-                    {product.variation.map((single, key) => {
-                      return (
-                        <label
-                          className={`pro-details-color-content--single ${single.color}`}
-                          key={key}
-                        >
-                          <input
-                            type="radio"
-                            value={single.color}
-                            name="product-color"
-                            checked={
-                              single.color === selectedProductColor
-                                ? "checked"
-                                : ""
-                            }
-                            onChange={() => {
-                              setSelectedProductColor(single.color);
-                              setSelectedProductSize(single.size[0].name);
-                              setProductStock(single.size[0].stock);
-                              setQuantityCount(1);
-                            }}
-                          />
-                          <span className="checkmark"></span>
-                        </label>
-                      );
-                    })}
+              {/* NO MOSTRAR PRECIOS */}
+              {product.rating && product.rating > 0 ? (
+                <div className="pro-details-rating-wrap">
+                  <div className="pro-details-rating">
+                    <Rating ratingValue={product.rating} />
                   </div>
                 </div>
-                {/* <div className="pro-details-size">
-                  <span>Size</span>
-                  <div className="pro-details-size-content">
-                    {product.variation &&
-                      product.variation.map(single => {
-                        return single.color === selectedProductColor
-                          ? single.size.map((singleSize, key) => {
-                              return (
-                                <label
-                                  className={`pro-details-size-content--single`}
-                                  key={key}
-                                >
-                                  <input
-                                    type="radio"
-                                    value={singleSize.name}
-                                    checked={
-                                      singleSize.name ===
-                                      selectedProductSize
-                                        ? "checked"
-                                        : ""
-                                    }
-                                    onChange={() => {
-                                      setSelectedProductSize(
-                                        singleSize.name
-                                      );
-                                      setProductStock(singleSize.stock);
-                                      setQuantityCount(1);
-                                    }}
-                                  />
-                                  <span className="size-name">
-                                    {singleSize.name}
-                                  </span>
-                                </label>
-                              );
-                            })
-                          : "";
+              ) : (
+                ""
+              )}
+              <div className="pro-details-list">
+                <p>{product.shortDescription}</p>
+              </div>
+
+              {product.variation && (
+                <div className="pro-details-size-color">
+                  <div className="pro-details-color-wrap">
+                    <span>Color</span>
+                    <div className="pro-details-color-content">
+                      {product.variation.map((single, key) => {
+                        return (
+                          <label
+                            className={`pro-details-color-content--single ${single.color}`}
+                            key={key}
+                          >
+                            <input
+                              type="radio"
+                              value={single.color}
+                              name="product-color"
+                              checked={
+                                single.color === selectedProductColor
+                              }
+                              onChange={() => {
+                                setSelectedProductColor(single.color);
+                                setSelectedProductSize(single.size[0].name);
+                                setProductStock(single.size[0].stock);
+                                setQuantityCount(1);
+                              }}
+                            />
+                            <span className="checkmark"></span>
+                          </label>
+                        );
                       })}
+                    </div>
                   </div>
-                </div> */}
-              </div>
-            ) : (
-              ""
-            )}
-            {product.affiliateLink ? (
-              <div className="pro-details-quality">
-                <div className="pro-details-cart btn-hover">
-                  <a
-                    href={product.affiliateLink}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    Comprar ahora
-                  </a>
                 </div>
-              </div>
-            ) : (
-              <div className="pro-details-quality">
-                <div className="cart-plus-minus">
-                  <button
-                    onClick={() =>
-                      setQuantityCount(
-                        quantityCount > 1 ? quantityCount - 1 : 1
-                      )
-                    }
-                    className="dec qtybutton"
-                  >
-                    -
-                  </button>
-                  <input
-                    className="cart-plus-minus-box"
-                    type="text"
-                    value={quantityCount}
-                    readOnly
-                  />
-                  <button
-                    onClick={() =>
-                      setQuantityCount(
-                        quantityCount < productStock - productCartQty
-                          ? quantityCount + 1
-                          : quantityCount
-                      )
-                    }
-                    className="inc qtybutton"
-                  >
-                    +
-                  </button>
+              )}
+
+              {product.affiliateLink ? (
+                <div className="pro-details-quality">
+                  <div className="pro-details-cart btn-hover">
+                    <a
+                      href={product.affiliateLink}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      Comprar ahora
+                    </a>
+                  </div>
                 </div>
-                <div className="pro-details-cart btn-hover">
-                  {productStock && productStock > 0 ? (
+              ) : (
+                <div className="pro-details-quality">
+                  <div className="cart-plus-minus">
                     <button
                       onClick={() =>
-                        dispatch(addToCart({
-                          ...product,
-                          quantity: quantityCount,
-                          selectedProductColor: selectedProductColor ? selectedProductColor : product.selectedProductColor ? product.selectedProductColor : null,
-                          selectedProductSize: selectedProductSize ? selectedProductSize : product.selectedProductSize ? product.selectedProductSize : null
-                        }))
+                        setQuantityCount(
+                          quantityCount > 1 ? quantityCount - 1 : 1
+                        )
                       }
-                      disabled={productCartQty >= productStock}
+                      className="dec qtybutton"
                     >
-                      {" "}
-                      Añadir al carrito{" "}
+                      -
                     </button>
-                  ) : (
-                    <button disabled>Agotado</button>
-                  )}
+                    <input
+                      className="cart-plus-minus-box"
+                      type="text"
+                      value={quantityCount}
+                      readOnly
+                    />
+                    <button
+                      onClick={() =>
+                        setQuantityCount(
+                          quantityCount < productStock - productCartQty
+                            ? quantityCount + 1
+                            : quantityCount
+                        )
+                      }
+                      className="inc qtybutton"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div className="pro-details-cart btn-hover">
+                    {productStock && productStock > 0 ? (
+                      <button
+                        onClick={() =>
+                          dispatch(addToCart({
+                            ...product,
+                            quantity: quantityCount,
+                            selectedProductColor: selectedProductColor ? selectedProductColor : null,
+                            selectedProductSize: selectedProductSize ? selectedProductSize : null
+                          }))
+                        }
+                        disabled={productCartQty >= productStock}
+                      >
+                        {" "}
+                        Añadir al carrito{" "}
+                      </button>
+                    ) : (
+                      <button disabled>Agotado</button>
+                    )}
+                  </div>
+                  <div className="pro-details-wishlist">
+                    <button
+                      className={wishlistItem !== undefined ? "active" : ""}
+                      disabled={wishlistItem !== undefined}
+                      title={
+                        wishlistItem !== undefined
+                          ? "Añadido a la lista de deseos"
+                          : "Añadir a la lista de deseos"
+                      }
+                      onClick={() => dispatch(addToWishlist(product))}
+                    >
+                      <i className="pe-7s-like" />
+                    </button>
+                  </div>
                 </div>
-                <div className="pro-details-wishlist">
-                  <button
-                    className={wishlistItem !== undefined ? "active" : ""}
-                    disabled={wishlistItem !== undefined}
-                    title={
-                      wishlistItem !== undefined
-                        ? "Añadido a la lista de deseos"
-                        : "Añadir a la lista de deseos"
-                    }
-                    onClick={() => dispatch(addToWishlist(product))}
-                  >
-                    <i className="pe-7s-like" />
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </Modal>
+    </Modal>
   );
 }
 
 ProductModal.propTypes = {
-  currency: PropTypes.shape({}),
-  discountedprice: PropTypes.number,
-  finaldiscountedprice: PropTypes.number,
-  finalproductprice: PropTypes.number,
   onHide: PropTypes.func,
   product: PropTypes.shape({}),
   show: PropTypes.bool,

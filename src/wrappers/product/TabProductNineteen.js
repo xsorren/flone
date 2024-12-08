@@ -35,7 +35,7 @@ const TabProductNineteen = ({
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="bestSeller">
-                <h4>Mas vendidos</h4>
+                <h4>Más vendidos</h4>
               </Nav.Link>
             </Nav.Item>
           </Nav>
