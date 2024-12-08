@@ -21,7 +21,6 @@ const ProductGridTwo = ({
 }
   const { cartItems } = useSelector((state) => state.cart);
   const { wishlistItems } = useSelector((state) => state.wishlist);
-  const { compareItems } = useSelector((state) => state.compare);
   const prods = getProducts(products, category, type, limit);
   
   return (
@@ -40,11 +39,6 @@ const ProductGridTwo = ({
               wishlistItem={
                 wishlistItems.find(
                   (wishlistItem) => wishlistItem.id === product.id
-                )
-              }
-              compareItem={
-                compareItems.find(
-                  (compareItem) => compareItem.id === product.id
                 )
               }
               titlePriceClass={titlePriceClass}

@@ -7,14 +7,12 @@ import { getDiscountPrice } from "../../helpers/product";
 import ProductModal from "./ProductModal";
 import { addToCart } from "../../store/slices/cart-slice";
 import { addToWishlist } from "../../store/slices/wishlist-slice";
-import { addToCompare } from "../../store/slices/compare-slice";
 
 const ProductGridSingleTen = ({
   product,
   currency,
   cartItem,
   wishlistItem,
-  compareItem,
   spaceBottomClass,
   colorClass,
   productGridStyleClass
@@ -154,7 +152,6 @@ const ProductGridSingleTen = ({
         finalProductPrice={finalProductPrice}
         finalDiscountedPrice={finalDiscountedPrice}
         wishlistItem={wishlistItem}
-        compareItem={compareItem}
       />
     </Fragment>
   );
@@ -162,10 +159,8 @@ const ProductGridSingleTen = ({
 
 ProductGridSingleTen.propTypes = {
   addToCart: PropTypes.func,
-  addToCompare: PropTypes.func,
   addToWishlist: PropTypes.func,
   cartItem: PropTypes.shape({}),
-  compareItem: PropTypes.shape({}),
   currency: PropTypes.shape({}),
   product: PropTypes.shape({}),
   sliderClassName: PropTypes.string,

@@ -8,14 +8,13 @@ import Rating from "./sub-components/ProductRating";
 import ProductModal from "./ProductModal";
 import { addToCart } from "../../store/slices/cart-slice";
 import { addToWishlist } from "../../store/slices/wishlist-slice";
-import { addToCompare } from "../../store/slices/compare-slice";
 
 const ProductGridSingleSix = ({
   product,
   currency,
   cartItem,
   wishlistItem,
-  compareItem,
+  
   spaceBottomClass
 }) => {
   const [modalShow, setModalShow] = useState(false);
@@ -144,7 +143,7 @@ const ProductGridSingleSix = ({
         finalProductPrice={finalProductPrice}
         finalDiscountedPrice={finalDiscountedPrice}
         wishlistItem={wishlistItem}
-        compareItem={compareItem}
+        
       />
     </Fragment>
   );
@@ -152,10 +151,10 @@ const ProductGridSingleSix = ({
 
 ProductGridSingleSix.propTypes = {
   addToCart: PropTypes.func,
-  addToCompare: PropTypes.func,
+  
   addToWishlist: PropTypes.func,
   cartItem: PropTypes.shape({}),
-  compareItem: PropTypes.shape({}),
+  
   currency: PropTypes.shape({}),
   product: PropTypes.shape({}),
   spaceBottomClass: PropTypes.string,
