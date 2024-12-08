@@ -1,12 +1,10 @@
-// src/components/ProductCreateModal.js
 import React, { useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
+import { supabase } from '../../utils/supabaseClient';
+import { uploadToS3 } from '../../utils/s3Client';
 
-// Styled Components
 const ModalOverlay = styled.div`
-  /* Estilos similares al modal de edición */
   position: fixed;
   top: 0;
   left: 0;
@@ -20,7 +18,6 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  /* Estilos similares al modal de edición */
   background-color: #fff;
   padding: 20px;
   border-radius: 5px;
@@ -78,10 +75,10 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     category: [],
     tag: [],
     affiliateLink: '',
-    // Añade otros campos si es necesario
   });
 
   const [images, setImages] = useState([]);
+  const bucketName = process.env.REACT_APP_S3_BUCKET;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -98,32 +95,54 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // Crear producto
-      const resProduct = await axiosInstance.post('/api/products', formData);
-      const productId = resProduct.data.product._id;
+    const { data: productData, error: productError } = await supabase
+      .from('products')
+      .insert([{
+        code: formData.code,
+        batch: formData.batch,
+        name: formData.name,
+        stock: Number(formData.stock),
+        purchase_cost: Number(formData.purchaseCost),
+        total_price: Number(formData.totalPrice),
+        price: Number(formData.price),
+        discount: Number(formData.discount),
+        short_description: formData.shortDescription,
+        affiliate_link: formData.affiliateLink
+      }])
+      .select();
 
-      // Subir imágenes si las hay
-      if (images.length > 0) {
-        const imageData = new FormData();
-        images.forEach((image) => {
-          imageData.append('images', image);
-        });
-
-        await axiosInstance.post(`/api/products/${productId}/images`, imageData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-      }
-
-      toast.success('Producto creado correctamente');
-      onClose();
-      refreshProducts(); // Refresca la lista de productos en el componente padre
-    } catch (err) {
-      console.error(err);
+    if (productError) {
+      console.error(productError);
       toast.error('Error al crear el producto');
+      return;
     }
+
+    const newProduct = productData[0];
+    const productId = newProduct.id;
+
+    for (const image of images) {
+      const filePath = `products/${productId}/${image.name}`;
+      try {
+        await uploadToS3(bucketName, filePath, image);
+        const imageUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
+        const { error: imageInsertError } = await supabase.from('images').insert({
+          product_id: productId,
+          url: imageUrl
+        });
+
+        if (imageInsertError) {
+          console.error(imageInsertError);
+          toast.error('Error al guardar la imagen en la BD');
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(`Error al subir la imagen ${image.name}`);
+      }
+    }
+
+    toast.success('Producto creado correctamente');
+    onClose();
+    refreshProducts();
   };
 
   return (
@@ -216,7 +235,6 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
             value={formData.affiliateLink}
             onChange={handleChange}
           />
-          {/* Añade más campos según sea necesario */}
 
           <div className="upload-images">
             <h4>Subir Imágenes:</h4>

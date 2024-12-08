@@ -1,22 +1,26 @@
-// src/components/login/login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
+import { supabase } from '../../utils/supabaseClient';
+
 const Login = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const navigate = useNavigate(); // Cambiado de useHistory a useNavigate
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const res = await axiosInstance.post('/api/auth/login', { username, password });
-            // Guarda el token en el almacenamiento local o en el estado global
-            localStorage.setItem('token', res.data.token);
-            navigate('/products'); // Redirige al listado de productos
-        } catch (err) {
-            console.error(err);
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+        
+        if (error) {
+            console.error(error);
             alert('Credenciales inválidas');
+        } else {
+            // Supabase guarda el session token internamente. 
+            // Opcionalmente, puedes guardarlo en localStorage, aunque supabase ya gestiona el session.
+            navigate('/products');
         }
     };
 
@@ -25,10 +29,10 @@ const Login = () => {
             <h2>Iniciar Sesión</h2>
             <form onSubmit={handleSubmit}>
                 <input
-                    type="text"
-                    placeholder="Usuario"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    type="email"
+                    placeholder="Correo"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                 />
                 <input

@@ -5,7 +5,7 @@ import App from "./App";
 import { store } from "./store/store";
 import PersistProvider from "./store/providers/persist-provider";
 import { setProducts } from "./store/slices/product-slice"
-import axiosInstance from './utils/axiosInstance';
+import { supabase } from './utils/supabaseClient'; // Importa el cliente Supabase
 import 'animate.css';
 import 'swiper/swiper-bundle.min.css';
 import "yet-another-react-lightbox/styles.css";
@@ -14,11 +14,14 @@ import "./assets/scss/style.scss";
 import "./i18n";
 
 const fetchProducts = async () => {
-    try {
-        const res = await axiosInstance.get('/api/products');
-        store.dispatch(setProducts(res.data));
-    } catch (err) {
-        console.error(err);
+    const { data, error } = await supabase
+        .from('products')
+        .select('*');
+
+    if (error) {
+        console.error(error);
+    } else {
+        store.dispatch(setProducts(data));
     }
 };
 
@@ -28,9 +31,8 @@ const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
     <Provider store={store}>
-      <PersistProvider>
-        <App />
-      </PersistProvider>
+        <PersistProvider>
+            <App />
+        </PersistProvider>
     </Provider>
 );
-

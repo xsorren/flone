@@ -1,11 +1,11 @@
 // src/components/ProductList.js
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
 import ProductEditModal from './ProductEditModal';
 import ProductViewModal from './ProductViewModal';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductCreateModal from './ProductCreateModal';
+import { supabase } from '../../utils/supabaseClient';
 
 // Styled Components
 const Container = styled.div`
@@ -155,7 +155,7 @@ const ProductList = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingProduct, setViewingProduct] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false); // Estado para el modal de creación
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -163,20 +163,30 @@ const ProductList = () => {
   }, []);
 
   const fetchProducts = async () => {
-    try {
-      const res = await axiosInstance.get('/api/products');
-      setProducts(res.data);
-    } catch (err) {
-      console.error(err);
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        id, code, name, stock, batch, purchase_cost, total_price, price, discount, short_description, affiliate_link,
+        product_categories!inner(category_id),
+        product_tags!inner(tag_id),
+        variations:variations(id, color, variation_sizes(name, stock)),
+        images(url)
+      `);
+    if (error) {
+      console.error(error);
+    } else {
+      // Ajusta el formateo de datos si es necesario, ya que ahora data viene de la base de datos Postgres
+      setProducts(data);
     }
   };
+
   const handleCreateProduct = () => {
     setShowCreateModal(true);
   };
 
   const handleCloseCreateModal = () => {
     setShowCreateModal(false);
-    fetchProducts(); // Refresca la lista de productos después de crear uno nuevo
+    fetchProducts();
   };
 
   const handleSelectProduct = (productId) => {
@@ -189,24 +199,25 @@ const ProductList = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedProducts.length === 0) return;
-    try {
-      await Promise.all(
-        selectedProducts.map((id) => axiosInstance.delete(`/api/products/${id}`))
-      );
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .in('id', selectedProducts);
+    if (!error) {
       fetchProducts();
       setSelectedProducts([]);
       setMultiSelect(false);
-    } catch (err) {
-      console.error(err);
+    } else {
+      console.error(error);
     }
   };
 
   const handleDeleteProduct = async (id) => {
-    try {
-      await axiosInstance.delete(`/api/products/${id}`);
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) {
+      console.error(error);
+    } else {
       fetchProducts();
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -220,8 +231,8 @@ const ProductList = () => {
     setShowViewModal(true);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/login');
   };
 
@@ -268,13 +279,13 @@ const ProductList = () => {
         </thead>
         <tbody>
           {products.map((product) => (
-            <Tr key={product._id}>
+            <Tr key={product.id}>
               {multiSelect && (
                 <Td>
                   <input
                     type="checkbox"
-                    checked={selectedProducts.includes(product._id)}
-                    onChange={() => handleSelectProduct(product._id)}
+                    checked={selectedProducts.includes(product.id)}
+                    onChange={() => handleSelectProduct(product.id)}
                   />
                 </Td>
               )}
@@ -287,7 +298,7 @@ const ProductList = () => {
                     <Button className="edit" onClick={() => handleEditProduct(product)}>
                       Editar
                     </Button>
-                    <Button className="delete" onClick={() => handleDeleteProduct(product._id)}>
+                    <Button className="delete" onClick={() => handleDeleteProduct(product.id)}>
                       Eliminar
                     </Button>
                     <Button className="view" onClick={() => handleViewProduct(product)}>
@@ -322,10 +333,7 @@ const ProductList = () => {
         />
       )}
       {showCreateModal && (
-        <ProductCreateModal
-          onClose={handleCloseCreateModal}
-          refreshProducts={fetchProducts}
-        />
+        <ProductCreateModal onClose={handleCloseCreateModal} refreshProducts={fetchProducts} />
       )}
     </Container>
   );

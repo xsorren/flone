@@ -1,10 +1,9 @@
-// src/components/ProductEditModal.js
 import React, { useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
+import { supabase } from '../../utils/supabaseClient';
+import { uploadToS3 } from '../../utils/s3Client';
 
-// Styled Components
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -99,19 +98,19 @@ const ProductEditModal = ({ product, onClose }) => {
     batch: product.batch || '',
     name: product.name || '',
     stock: product.stock || 0,
-    purchaseCost: product.purchaseCost || 0,
-    totalPrice: product.totalPrice || 0,
+    purchaseCost: product.purchase_cost || 0,
+    totalPrice: product.total_price || 0,
     price: product.price || 0,
     discount: product.discount || 0,
-    shortDescription: product.shortDescription || '',
+    shortDescription: product.short_description || '',
     category: product.category || [],
     tag: product.tag || [],
-    affiliateLink: product.affiliateLink || '',
-    // Añade otros campos si es necesario
+    affiliateLink: product.affiliate_link || '',
   });
 
   const [images, setImages] = useState([]);
   const [currentImages, setCurrentImages] = useState(product.images || []);
+  const bucketName = process.env.REACT_APP_S3_BUCKET;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -128,57 +127,86 @@ const ProductEditModal = ({ product, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // Actualizar producto
-      await axiosInstance.put(`/api/products/${product._id}`, formData);
-      toast.success('Producto actualizado correctamente');
+    const { error: updateError } = await supabase
+      .from('products')
+      .update({
+        code: formData.code,
+        batch: formData.batch,
+        name: formData.name,
+        stock: Number(formData.stock),
+        purchase_cost: Number(formData.purchaseCost),
+        total_price: Number(formData.totalPrice),
+        price: Number(formData.price),
+        discount: Number(formData.discount),
+        short_description: formData.shortDescription,
+        affiliate_link: formData.affiliateLink
+      })
+      .eq('id', product.id);
 
-      // Subir imágenes
-      if (images.length > 0) {
-        const imageData = new FormData();
-        images.forEach((image) => {
-          imageData.append('images', image);
-        });
-
-        const res = await axiosInstance.post(`/api/products/${product._id}/images`, imageData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
-        // Actualizar imágenes actuales con las nuevas
-        setCurrentImages(res.data.images);
-        toast.success('Imágenes subidas correctamente');
-      }
-
-      onClose();
-    } catch (err) {
-      console.error(err);
+    if (updateError) {
+      console.error(updateError);
       toast.error('Error al actualizar el producto');
+      return;
     }
+
+    // Subir nuevas imágenes
+    for (const image of images) {
+      const filePath = `products/${product.id}/${image.name}`;
+      try {
+        await uploadToS3(bucketName, filePath, image);
+        const imageUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
+
+        const { data: insertedImages, error: imageInsertError } = await supabase.from('images').insert({
+          product_id: product.id,
+          url: imageUrl
+        }).select();
+
+        if (imageInsertError) {
+          console.error(imageInsertError);
+          toast.error('Error al guardar imagen en la BD');
+        } else {
+          setCurrentImages([...currentImages, ...insertedImages]);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(`Error al subir la imagen ${image.name}`);
+      }
+    }
+
+    toast.success('Producto actualizado correctamente');
+    onClose();
   };
 
   const handleDeleteProduct = async () => {
-    try {
-      await axiosInstance.delete(`/api/products/${product._id}`);
-      toast.success('Producto eliminado correctamente');
-      onClose();
-    } catch (err) {
-      console.error(err);
+    // Eliminar producto
+    const { error: deleteError } = await supabase.from('products').delete().eq('id', product.id);
+    if (deleteError) {
+      console.error(deleteError);
       toast.error('Error al eliminar el producto');
+      return;
     }
+    toast.success('Producto eliminado correctamente');
+    onClose();
   };
 
-  // Función para eliminar una imagen
-  const handleDeleteImage = async (imageId) => {
-    try {
-      await axiosInstance.delete(`/api/products/${product._id}/images/${imageId}`);
-      setCurrentImages(currentImages.filter((img) => img._id !== imageId));
-      toast.success('Imagen eliminada correctamente');
-    } catch (err) {
-      console.error(err);
+  const handleDeleteImage = async (imgId) => {
+    const imgToDelete = currentImages.find((img) => img.id === imgId);
+    if (!imgToDelete) return;
+
+    // Opcionalmente, podrías eliminar el archivo S3, 
+    // pero Supabase Storage no exige esto; basta con borrarlo de la BD.
+    // Si quieres eliminarlo también de Storage, necesitarías
+    // usar DeleteObjectCommand del SDK S3 con el Key correspondiente.
+
+    const { error: imageDeleteError } = await supabase.from('images').delete().eq('id', imgId);
+    if (imageDeleteError) {
+      console.error(imageDeleteError);
       toast.error('Error al eliminar la imagen');
+      return;
     }
+
+    setCurrentImages(currentImages.filter((img) => img.id !== imgId));
+    toast.success('Imagen eliminada correctamente');
   };
 
   return (
@@ -254,14 +282,14 @@ const ProductEditModal = ({ product, onClose }) => {
             type="text"
             name="category"
             placeholder="Categorías (separadas por comas)"
-            value={formData.category.join(', ')}
+            value={Array.isArray(formData.category) ? formData.category.join(', ') : formData.category}
             onChange={handleChange}
           />
           <Input
             type="text"
             name="tag"
             placeholder="Etiquetas (separadas por comas)"
-            value={formData.tag.join(', ')}
+            value={Array.isArray(formData.tag) ? formData.tag.join(', ') : formData.tag}
             onChange={handleChange}
           />
           <Input
@@ -271,21 +299,21 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.affiliateLink}
             onChange={handleChange}
           />
-          {/* Añade más campos según sea necesario */}
 
           <div className="current-images">
             <h4>Imágenes Actuales:</h4>
             {currentImages.length > 0 ? (
               <ImageContainer>
                 {currentImages.map((img) => (
-                  <ImageItem key={img._id}>
+                  <ImageItem key={img.id}>
                     <img
-                      src={img.data} // Usamos 'img.data' para mostrar la imagen
-                      alt={`Imagen`}
+                      src={img.url}
+                      alt="Imagen del producto"
+                      style={{ maxHeight: '100px', maxWidth: '100px' }}
                     />
                     <DeleteImageButton
                       type="button"
-                      onClick={() => handleDeleteImage(img._id)}
+                      onClick={() => handleDeleteImage(img.id)}
                     >
                       &times;
                     </DeleteImageButton>

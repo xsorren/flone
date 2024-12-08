@@ -1,9 +1,6 @@
-// src/components/ProductViewModal.js
 import React from 'react';
-import axiosInstance from '../../utils/axiosInstance';
 import styled from 'styled-components';
 
-// Styled Components
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -40,6 +37,10 @@ const Button = styled.button`
 `;
 
 const ProductViewModal = ({ product, onClose }) => {
+  // Extraer categorías y tags en arrays simples de nombres
+  const categoryNames = product.product_categories ? product.product_categories.map(pc => pc.category.name) : [];
+  const tagNames = product.product_tags ? product.product_tags.map(pt => pt.tag.name) : [];
+
   return (
     <ModalOverlay>
       <ModalContent>
@@ -48,14 +49,14 @@ const ProductViewModal = ({ product, onClose }) => {
         <p><strong>Lote:</strong> {product.batch}</p>
         <p><strong>Artículo:</strong> {product.name}</p>
         <p><strong>Stock:</strong> {product.stock}</p>
-        <p><strong>Costo Compra:</strong> {product.purchaseCost}</p>
-        <p><strong>Precio Total:</strong> {product.totalPrice}</p>
+        <p><strong>Costo Compra:</strong> {product.purchase_cost}</p>
+        <p><strong>Precio Total:</strong> {product.total_price}</p>
         <p><strong>Precio de Venta:</strong> {product.price}</p>
         <p><strong>Descuento:</strong> {product.discount}%</p>
-        <p><strong>Descripción Corta:</strong> {product.shortDescription}</p>
-        <p><strong>Categorías:</strong> {product.category.join(', ')}</p>
-        <p><strong>Etiquetas:</strong> {product.tag.join(', ')}</p>
-        <p><strong>Enlace de Afiliado:</strong> <a href={product.affiliateLink}>{product.affiliateLink}</a></p>
+        <p><strong>Descripción Corta:</strong> {product.short_description}</p>
+        <p><strong>Categorías:</strong> {categoryNames.join(', ')}</p>
+        <p><strong>Etiquetas:</strong> {tagNames.join(', ')}</p>
+        <p><strong>Enlace de Afiliado:</strong> <a href={product.affiliate_link} target="_blank" rel="noopener noreferrer">{product.affiliate_link}</a></p>
 
         {/* Mostrar imágenes */}
         {product.images && product.images.length > 0 && (
@@ -63,25 +64,26 @@ const ProductViewModal = ({ product, onClose }) => {
             <h4>Imágenes:</h4>
             {product.images.map((img, index) => (
               <img
-                key={img._id}
-                src={img.data} // Usamos el campo 'data' que contiene la imagen en Base64
+                key={index}
+                src={img.url} 
                 alt={`Imagen ${index + 1}`}
+                style={{ maxWidth: '100%', maxHeight: '200px', display: 'block', marginBottom: '10px' }}
               />
             ))}
           </div>
         )}
 
         {/* Variaciones */}
-        {product.variation && product.variation.length > 0 && (
+        {product.variations && product.variations.length > 0 && (
           <div>
             <h4>Variaciones:</h4>
-            {product.variation.map((variant, index) => (
-              <div key={index}>
+            {product.variations.map((variant, variantIndex) => (
+              <div key={variantIndex} style={{ marginBottom: '10px' }}>
                 <p><strong>Color:</strong> {variant.color}</p>
-                {variant.size && variant.size.length > 0 && (
+                {variant.variation_sizes && variant.variation_sizes.length > 0 && (
                   <ul>
-                    {variant.size.map((sizeItem, idx) => (
-                      <li key={idx}>
+                    {variant.variation_sizes.map((sizeItem, sizeIndex) => (
+                      <li key={sizeIndex}>
                         Tamaño: {sizeItem.name}, Stock: {sizeItem.stock}
                       </li>
                     ))}
