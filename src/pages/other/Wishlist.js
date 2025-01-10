@@ -68,6 +68,11 @@ const Wishlist = () => {
                             const cartItem = cartItems.find(
                               item => item.id === wishlistItem.id
                             );
+                            const hasImages = wishlistItem.images && wishlistItem.images.length > 0;
+                            const imageUrl = hasImages ? wishlistItem.images[0].url : "/assets/img/no-imagen.png";
+
+                            console.log("Image URL:", process.env.PUBLIC_URL + imageUrl);
+
                             return (
                               <tr key={key}>
                                 <td className="product-thumbnail">
@@ -80,12 +85,8 @@ const Wishlist = () => {
                                   >
                                     <img
                                       className="img-fluid"
-                                      src={
-                                        wishlistItem.image && wishlistItem.image.length > 0
-                                          ? process.env.PUBLIC_URL + wishlistItem.image[0]
-                                          : process.env.PUBLIC_URL + "/assets/img/no-imagen.png"
-                                      }
-                                      alt=""
+                                      src={process.env.PUBLIC_URL + imageUrl}
+                                      alt={wishlistItem.name || "No disponible"}
                                     />
                                   </Link>
                                 </td>

@@ -11,12 +11,12 @@ import Swiper, { SwiperSlide } from "../../components/swiper";
 const ProductImageGalleryLeftThumb = ({ product, thumbPosition }) => {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [index, setIndex] = useState(-1);
-  const slides = product?.image.map((img, i) => ({
-      src: process.env.PUBLIC_URL + img,
-      key: i,
-  }));
 
-  // swiper slider settings
+  const slides = product?.images?.map((img, i) => ({
+    src: process.env.PUBLIC_URL + img.url,
+    key: i,
+  })) || [];
+
   const gallerySwiperParams = {
     spaceBetween: 10,
     loop: true,
@@ -60,76 +60,74 @@ const ProductImageGalleryLeftThumb = ({ product, thumbPosition }) => {
     }
   };
 
+  const hasDiscount = product.discount && product.discount > 0;
+  const isNew = product.new;
+
   return (
     <Fragment>
       <div className="row row-5 test">
         <div
-          className={clsx(thumbPosition && thumbPosition === "left"
+          className={clsx(thumbPosition === "left"
               ? "col-xl-10 order-1 order-xl-2"
               : "col-xl-10")}
         >
           <div className="product-large-image-wrapper">
-            {product.discount || product.new ? (
+            {(hasDiscount || isNew) && (
               <div className="product-img-badges">
-                {product.discount ? (
+                {hasDiscount ? (
                   <span className="pink">-{product.discount}%</span>
-                ) : (
-                  ""
-                )}
-                {product.new ? <span className="purple">New</span> : ""}
+                ) : null}
+                {isNew ? <span className="purple">New</span> : null}
               </div>
-            ) : (
-              ""
             )}
-            {product?.image?.length ? (
+            {product?.images?.length ? (
               <Swiper options={gallerySwiperParams}>
-                {product?.image.map((single, key) => (
+                {product.images.map((single, key) => (
                   <SwiperSlide key={key}>
                     <button className="lightgallery-button" onClick={() => setIndex(key)}>
                       <i className="pe-7s-expand1"></i>
                     </button>
                     <div className="single-image">
                       <img
-                        src={process.env.PUBLIC_URL + single}
+                        src={process.env.PUBLIC_URL + single.url}
                         className="img-fluid"
-                        alt=""
+                        alt={product.name || "No disponible"}
                       />
                     </div>
                   </SwiperSlide>
                 ))}
                 <AnotherLightbox
-                    open={index >= 0}
-                    index={index}
-                    close={() => setIndex(-1)}
-                    slides={slides}
-                    plugins={[Thumbnails, Zoom, Fullscreen]}
+                  open={index >= 0}
+                  index={index}
+                  close={() => setIndex(-1)}
+                  slides={slides}
+                  plugins={[Thumbnails, Zoom, Fullscreen]}
                 />
               </Swiper>
             ) : null}
           </div>
         </div>
         <div
-          className={clsx(thumbPosition && thumbPosition === "left"
+          className={clsx(thumbPosition === "left"
               ? "col-xl-2 order-2 order-xl-1"
               : "col-xl-2")}
         >
           <div className="product-small-image-wrapper product-small-image-wrapper--side-thumb">
-            {product?.image?.length ? (
+            {product?.images?.length ? (
               <Swiper options={thumbnailSwiperParams}>
-                {product.image.map((single, key) => (
+                {product.images.map((single, key) => (
                   <SwiperSlide key={key}>
                     <div className="single-image">
                       <img
-                        src={process.env.PUBLIC_URL + single}
+                        src={process.env.PUBLIC_URL + single.url}
                         className="img-fluid"
-                        alt=""
+                        alt={product.name || "No disponible"}
                       />
                     </div>
                   </SwiperSlide>
                 ))}
               </Swiper>
             ) : null }
-            
           </div>
         </div>
       </div>
@@ -138,7 +136,9 @@ const ProductImageGalleryLeftThumb = ({ product, thumbPosition }) => {
 };
 
 ProductImageGalleryLeftThumb.propTypes = {
-  product: PropTypes.shape({}),
+  product: PropTypes.shape({
+    name: PropTypes.string.isRequired
+  }),
   thumbPosition: PropTypes.string
 };
 

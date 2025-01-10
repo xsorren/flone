@@ -1,232 +1,191 @@
-// // get products
-// export const getProducts = (products, category, type, limit) => {
-//   // Filtrar por categoría usando .includes() para mayor claridad
-//   const finalProducts = category
-//     ? products.filter(product => product.category.includes(category))
-//     : products;
-
-//   // Eliminar condiciones para tipos 'new' y 'bestSeller' ya que no existen en el modelo
-//   if (type === "saleItems") {
-//     const saleItems = finalProducts.filter(
-//       single => single.discount && single.discount > 0
-//     );
-//     return saleItems.slice(0, limit || saleItems.length);
-//   }
-
-//   // Si necesitas otros tipos, asegúrate de que los campos existan en el modelo
-//   // Por ejemplo, ordenar por rating
-//   if (type === "topRated") {
-//     return finalProducts
-//       .sort((a, b) => b.rating - a.rating)
-//       .slice(0, limit || finalProducts.length);
-//   }
-
-//   // Ordenar por precio alto a bajo o bajo a alto
-//   if (type === "priceHighToLow") {
-//     return finalProducts
-//       .sort((a, b) => b.price - a.price)
-//       .slice(0, limit || finalProducts.length);
-//   }
-
-//   if (type === "priceLowToHigh") {
-//     return finalProducts
-//       .sort((a, b) => a.price - b.price)
-//       .slice(0, limit || finalProducts.length);
-//   }
-
-//   // Retornar productos filtrados por categoría con límite
-//   return finalProducts.slice(0, limit || finalProducts.length);
-// };
+import { stringToArray } from "./stringToArray";
 
 
-
-// get products (versión temporal que devuelve todos los productos)
+// get products
 export const getProducts = (products, category, type, limit) => {
-  // Retorna todos los productos sin aplicar filtros ni límites
-  return products;
+  // Actualmente devuelve todos los productos sin filtrar ni limitar.
+  // Puedes agregar filtrados aquí si lo deseas, comprobando siempre
+  // la existencia de los campos antes de usarlos.
+  return products || [];
 };
-
 
 // get product discount price
 export const getDiscountPrice = (price, discount) => {
-  return discount && discount > 0 ? price - price * (discount / 100) : null;
+  if (price == null || discount == null || discount <= 0) return null;
+  return price - price * (discount / 100);
 };
 
 // get product cart quantity
+// Si no existe variation, color, size, etc., se hace el matching básico por id.
+// Si existe variation, se comprueba con cuidado. Si no hay coincidencia, se retorna 0.
 export const getProductCartQuantity = (cartItems, product, color, size) => {
-  let productInCart = cartItems.find(
-    single =>
-      single.id === product.id &&
-      (single.selectedProductColor
-        ? single.selectedProductColor === color
-        : true) &&
-      (single.selectedProductSize ? single.selectedProductSize === size : true)
-  );
-  if (cartItems.length >= 1 && productInCart) {
-    if (product.variation) {
-      return cartItems.find(
-        single =>
-          single.id === product.id &&
-          single.selectedProductColor === color &&
-          single.selectedProductSize === size
-      ).quantity;
-    } else {
-      return cartItems.find(single => product.id === single.id).quantity;
-    }
-  } else {
-    return 0;
-  }
+  if (!product?.id) return 0; 
+  // Buscar el producto en el carrito coincidiendo con color/size si existen
+  let productInCart = cartItems.find(single => {
+    if (single.id !== product.id) return false;
+    if (color && single.selectedProductColor && single.selectedProductColor !== color) return false;
+    if (size && single.selectedProductSize && single.selectedProductSize !== size) return false;
+    return true;
+  });
+
+  if (!productInCart) return 0;
+  return productInCart.quantity || 0;
 };
 
 export const cartItemStock = (item, color, size) => {
-  if (item.stock) {
+  // Si no hay stock o variations, devolvemos un valor por defecto.
+  if (typeof item.stock === "number") {
     return item.stock;
-  } else {
-    return item.variation
-      .filter(single => single.color === color)[0]
-      .size.filter(single => single.name === size)[0].stock;
   }
-};
 
-//get products based on category
-// get products based on category, tag, color, size, etc.
-export const getSortedProducts = (products, sortType, sortValue) => {
-  if (products && sortType && sortValue) {
-    switch (sortType) {
-      case "category":
-        return products.filter(product => product.category.includes(sortValue));
-
-      case "tag":
-        return products.filter(product => product.tag.includes(sortValue));
-
-      case "color":
-        return products.filter(
-          product =>
-            product.variation &&
-            product.variation.some(single => single.color === sortValue)
-        );
-
-      case "size":
-        return products.filter(
-          product =>
-            product.variation &&
-            product.variation.some(variation =>
-              variation.size.some(singleSize => singleSize.name === sortValue)
-            )
-        );
-
-      case "filterSort":
-        let sortProducts = [...products];
-        if (sortValue === "default") {
-          return sortProducts;
-        }
-        if (sortValue === "priceHighToLow") {
-          return sortProducts.sort((a, b) => b.price - a.price);
-        }
-        if (sortValue === "priceLowToHigh") {
-          return sortProducts.sort((a, b) => a.price - b.price);
-        }
-        if (sortValue === "topRated") {
-          return sortProducts.sort((a, b) => b.rating - a.rating);
-        }
-        return sortProducts;
-
-      default:
-        return products;
+  if (item.variation && Array.isArray(item.variation)) {
+    const variationMatch = item.variation.find(v => v.color === color);
+    if (variationMatch && Array.isArray(variationMatch.size)) {
+      const sizeMatch = variationMatch.size.find(s => s.name === size);
+      return sizeMatch?.stock ?? 0;
     }
   }
-  return products;
+  return 0; // Si no hay nada, retorna 0
 };
 
+// get products based on category, tag, color, size, etc.
+export const getSortedProducts = (products, sortType, sortValue) => {
+  if (!Array.isArray(products)) return [];
+  if (!sortType || !sortValue) return products;
 
-// get individual element
+  switch (sortType) {
+    case "category":
+      return products.filter(product => {
+        const cat = product.category ?? [];
+        return Array.isArray(cat) && cat.includes(sortValue);
+      });
+
+    case "tag":
+      return products.filter(product => {
+        const tags = product.tag ?? [];
+        return Array.isArray(tags) && tags.includes(sortValue);
+      });
+
+    case "color":
+      return products.filter(product => {
+        const variations = product.variation ?? [];
+        return variations.some(single => single.color === sortValue);
+      });
+
+    case "size":
+      return products.filter(product => {
+        const variations = product.variation ?? [];
+        return variations.some(variation =>
+          Array.isArray(variation.size) &&
+          variation.size.some(singleSize => singleSize.name === sortValue)
+        );
+      });
+
+    case "filterSort":
+      let sortProducts = [...products];
+      if (sortValue === "default") {
+        return sortProducts;
+      }
+      if (sortValue === "priceHighToLow") {
+        // Si no hay price, consideramos price=0
+        return sortProducts.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+      }
+      if (sortValue === "priceLowToHigh") {
+        return sortProducts.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+      }
+      if (sortValue === "topRated") {
+        // Si no hay rating, consideramos rating=0
+        return sortProducts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+      }
+      return sortProducts;
+
+    default:
+      return products;
+  }
+};
+
+// Función auxiliar para obtener array con valores únicos
 const getIndividualItemArray = array => {
-  let individualItemArray = array.filter(function(v, i, self) {
-    return i === self.indexOf(v);
-  });
-  return individualItemArray;
+  if (!Array.isArray(array)) return [];
+  return array.filter((v, i, self) => i === self.indexOf(v));
 };
 
 // get individual categories
-export const getIndividualCategories = products => {
-  let productCategories = [];
-  products &&
-    products.map(product => {
-      return (
-        product.category &&
-        product.category.map(single => {
-          return productCategories.push(single);
-        })
-      );
-    });
-  const individualProductCategories = getIndividualItemArray(productCategories);
-  return individualProductCategories;
+export const getIndividualCategories = (products) => {
+  if (!Array.isArray(products)) return [];
+  let allCategories = [];
+
+  products.forEach((product) => {
+    // category es un string y lo convertimos en array
+    const categoriesArray = stringToArray(product.category);
+    allCategories = allCategories.concat(categoriesArray);
+  });
+
+  // Quitamos duplicados
+  return [...new Set(allCategories)];
 };
+
+
 
 // get individual tags
-export const getIndividualTags = products => {
-  let productTags = [];
-  products &&
-    products.map(product => {
-      return (
-        product.tag &&
-        product.tag.map(single => {
-          return productTags.push(single);
-        })
-      );
-    });
-  const individualProductTags = getIndividualItemArray(productTags);
-  return individualProductTags;
+export const getIndividualTags = (products) => {
+  if (!Array.isArray(products)) return [];
+  let allTags = [];
+
+  products.forEach((product) => {
+    // product.tag es un string
+    const tagsArray = stringToArray(product.tag);
+    allTags = allTags.concat(tagsArray);
+  });
+
+  // Quitamos duplicados
+  return [...new Set(allTags)];
 };
+
 
 // get individual colors
-export const getIndividualColors = products => {
-  let productColors = [];
-  products &&
-    products.map(product => {
-      return (
-        product.variation &&
-        product.variation.map(single => {
-          return productColors.push(single.color);
-        })
-      );
-    });
-  const individualProductColors = getIndividualItemArray(productColors);
-  return individualProductColors;
+export const getIndividualColors = (products) => {
+  if (!Array.isArray(products)) return [];
+  let allColors = [];
+
+  products.forEach((product) => {
+    // product.color es un string
+    const colorsArray = stringToArray(product.color);
+    allColors = allColors.concat(colorsArray);
+  });
+
+  // Quitamos duplicados
+  return [...new Set(allColors)];
 };
 
+
 // get individual sizes
-export const getProductsIndividualSizes = products => {
-  let productSizes = [];
-  products &&
-    products.map(product => {
-      return (
-        product.variation &&
-        product.variation.map(single => {
-          return single.size.map(single => {
-            return productSizes.push(single.name);
-          });
-        })
-      );
-    });
-  const individualProductSizes = getIndividualItemArray(productSizes);
-  return individualProductSizes;
+export const getProductsIndividualSizes = (products) => {
+  if (!Array.isArray(products)) return [];
+  let allSizes = [];
+
+  products.forEach((product) => {
+    // product.size es un string
+    const sizesArray = stringToArray(product.size);
+    allSizes = allSizes.concat(sizesArray);
+  });
+
+  // Quitamos duplicados
+  return [...new Set(allSizes)];
 };
+
 
 // get product individual sizes
 export const getIndividualSizes = product => {
+  if (!product || !Array.isArray(product.variation)) return [];
   let productSizes = [];
-  product.variation &&
-    product.variation.map(singleVariation => {
-      return (
-        singleVariation.size &&
-        singleVariation.size.map(singleSize => {
-          return productSizes.push(singleSize.name);
-        })
-      );
+  product.variation.forEach(singleVariation => {
+    const sizes = singleVariation.size ?? [];
+    sizes.forEach(s => {
+      if (s.name) productSizes.push(s.name);
     });
-  const individualSizes = getIndividualItemArray(productSizes);
-  return individualSizes;
+  });
+  return getIndividualItemArray(productSizes);
 };
 
 export const setActiveSort = e => {

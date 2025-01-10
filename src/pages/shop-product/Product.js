@@ -5,7 +5,6 @@ import SEO from "../../components/seo";
 import LayoutOne from "../../layouts/LayoutOne";
 import Breadcrumb from "../../wrappers/breadcrumb/Breadcrumb";
 import RelatedProductSlider from "../../wrappers/product/RelatedProductSlider";
-import ProductDescriptionTab from "../../wrappers/product/ProductDescriptionTab";
 import ProductImageDescription from "../../wrappers/product/ProductImageDescription";
 
 const Product = () => {
@@ -13,13 +12,12 @@ const Product = () => {
   let { id } = useParams();
   const { products } = useSelector((state) => state.product);
   const product = products.find(product => product.id == id);
-  console.log(id, products, product)
 
   return (
     <Fragment>
       <SEO
         titleTemplate="Product Page"
-        description="Product Page of flone react minimalist eCommerce template."
+        description="Product page description."
       />
 
       <LayoutOne >
@@ -32,18 +30,21 @@ const Product = () => {
         />
 
         {/* product description with image */}
-        <ProductImageDescription
-          spaceTopClass="pt-100"
-          spaceBottomClass="pb-100"
-          product={product}
-        />
-
+        {product && (
+          <ProductImageDescription
+            spaceTopClass="pt-100"
+            spaceBottomClass="pb-100"
+            product={product}
+          />
+        )}
 
         {/* related product slider */}
-        <RelatedProductSlider
-          spaceBottomClass="pb-95"
-          category={product.category[0]}
-        />
+        {product && product.category && product.category.length > 0 && (
+          <RelatedProductSlider
+            spaceBottomClass="pb-95"
+            category={product.category[0]}
+          />
+        )}
       </LayoutOne>
     </Fragment>
   );

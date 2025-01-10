@@ -1,8 +1,8 @@
+// ProductCreateModal.js
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
 import { supabase } from '../../utils/supabaseClient';
-import { uploadToS3 } from '../../utils/s3Client';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -72,13 +72,12 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     price: 0,
     discount: 0,
     shortDescription: '',
-    category: [],
-    tag: [],
-    affiliateLink: '',
+    category: [], // ingresadas separadas por comas
+    tag: [], // ingresadas separadas por comas
+    affiliateLink: ''
   });
 
   const [images, setImages] = useState([]);
-  const bucketName = process.env.REACT_APP_S3_BUCKET;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -93,56 +92,177 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     setImages([...e.target.files]);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { data: productData, error: productError } = await supabase
-      .from('products')
-      .insert([{
-        code: formData.code,
-        batch: formData.batch,
-        name: formData.name,
-        stock: Number(formData.stock),
-        purchase_cost: Number(formData.purchaseCost),
-        total_price: Number(formData.totalPrice),
-        price: Number(formData.price),
-        discount: Number(formData.discount),
-        short_description: formData.shortDescription,
-        affiliate_link: formData.affiliateLink
-      }])
-      .select();
+  const insertCategories = async (productId, categories) => {
+    for (const catName of categories) {
+      if (catName === '') continue;
+      // Verificar si existe la categoría
+      let { data: catData, error: catError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('name', catName)
+        .single();
 
-    if (productError) {
-      console.error(productError);
-      toast.error('Error al crear el producto');
-      return;
-    }
+      if (catError && catError.code !== 'PGRST116') {
+        console.error(catError);
+        toast.error(`Error buscando la categoría ${catName}`);
+        continue;
+      }
 
-    const newProduct = productData[0];
-    const productId = newProduct.id;
+      let categoryId;
+      if (!catData) {
+        // Crear la categoría
+        const { data: newCatData, error: newCatError } = await supabase
+          .from('categories')
+          .insert({ name: catName })
+          .select()
+          .single();
 
-    for (const image of images) {
-      const filePath = `products/${productId}/${image.name}`;
-      try {
-        await uploadToS3(bucketName, filePath, image);
-        const imageUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
-        const { error: imageInsertError } = await supabase.from('images').insert({
-          product_id: productId,
-          url: imageUrl
-        });
-
-        if (imageInsertError) {
-          console.error(imageInsertError);
-          toast.error('Error al guardar la imagen en la BD');
+        if (newCatError) {
+          console.error(newCatError);
+          toast.error(`Error creando la categoría ${catName}`);
+          continue;
         }
-      } catch (err) {
-        console.error(err);
-        toast.error(`Error al subir la imagen ${image.name}`);
+        categoryId = newCatData.id;
+      } else {
+        categoryId = catData.id;
+      }
+
+      // Insertar relación en product_categories
+      const { error: relError } = await supabase
+        .from('product_categories')
+        .insert({ product_id: productId, category_id: categoryId });
+
+      if (relError) {
+        console.error(relError);
+        toast.error(`Error asignando categoría ${catName} al producto`);
       }
     }
+  };
 
-    toast.success('Producto creado correctamente');
-    onClose();
-    refreshProducts();
+  const insertTags = async (productId, tags) => {
+    for (const tagName of tags) {
+      if (tagName === '') continue;
+      // Verificar si existe el tag
+      let { data: tagData, error: tagError } = await supabase
+        .from('tags')
+        .select('id')
+        .eq('name', tagName)
+        .single();
+
+      if (tagError && tagError.code !== 'PGRST116') {
+        console.error(tagError);
+        toast.error(`Error buscando el tag ${tagName}`);
+        continue;
+      }
+
+      let tagId;
+      if (!tagData) {
+        // Crear el tag
+        const { data: newTagData, error: newTagError } = await supabase
+          .from('tags')
+          .insert({ name: tagName })
+          .select()
+          .single();
+
+        if (newTagError) {
+          console.error(newTagError);
+          toast.error(`Error creando el tag ${tagName}`);
+          continue;
+        }
+        tagId = newTagData.id;
+      } else {
+        tagId = tagData.id;
+      }
+
+      // Insertar relación en product_tags
+      const { error: relError } = await supabase
+        .from('product_tags')
+        .insert({ product_id: productId, tag_id: tagId });
+
+      if (relError) {
+        console.error(relError);
+        toast.error(`Error asignando tag ${tagName} al producto`);
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Crear producto
+      const { data: productData, error: productError } = await supabase
+        .from('products')
+        .insert([{
+          code: formData.code,
+          batch: formData.batch,
+          name: formData.name,
+          stock: Number(formData.stock),
+          purchase_cost: Number(formData.purchaseCost),
+          total_price: Number(formData.totalPrice),
+          price: Number(formData.price),
+          discount: Number(formData.discount),
+          short_description: formData.shortDescription,
+          affiliate_link: formData.affiliateLink
+        }])
+        .select();
+  
+      if (productError) {
+        console.error(productError);
+        toast.error('Error al crear el producto');
+        return;
+      }
+
+      const newProduct = productData[0];
+      const productId = newProduct.id;
+
+      // Insertar categorías
+      if (formData.category && formData.category.length > 0) {
+        await insertCategories(productId, formData.category);
+      }
+
+      // Insertar tags
+      if (formData.tag && formData.tag.length > 0) {
+        await insertTags(productId, formData.tag);
+      }
+
+      // Subir imágenes si las hay
+      if (images.length > 0) {
+        for (const image of images) {
+          const filePath = `products/${productId}/${image.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from('product-images')
+            .upload(filePath, image);
+
+          if (uploadError) {
+            console.error(uploadError);
+            toast.error('Error al subir imagen: ' + image.name);
+            continue;
+          }
+
+          // Obtener URL pública
+          const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(filePath);
+          // Insertar registro en tabla images
+          const { error: imageInsertError } = await supabase
+            .from('images')
+            .insert({
+              product_id: productId,
+              url: publicUrl
+            });
+
+          if (imageInsertError) {
+            console.error(imageInsertError);
+            toast.error('Error al guardar imagen en la BD');
+          }
+        }
+      }
+
+      toast.success('Producto creado correctamente');
+      onClose();
+      refreshProducts(); // Refresca la lista de productos en el componente padre
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al crear el producto');
+    }
   };
 
   return (
@@ -214,20 +334,24 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
             value={formData.shortDescription}
             onChange={handleChange}
           ></Textarea>
+
+          {/* Campo para categorías */}
           <Input
             type="text"
             name="category"
             placeholder="Categorías (separadas por comas)"
-            value={formData.category.join(', ')}
+            value={Array.isArray(formData.category) ? formData.category.join(', ') : formData.category}
             onChange={handleChange}
           />
+          {/* Campo para tags */}
           <Input
             type="text"
             name="tag"
             placeholder="Etiquetas (separadas por comas)"
-            value={formData.tag.join(', ')}
+            value={Array.isArray(formData.tag) ? formData.tag.join(', ') : formData.tag}
             onChange={handleChange}
           />
+
           <Input
             type="text"
             name="affiliateLink"

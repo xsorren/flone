@@ -15,14 +15,18 @@ import "./i18n";
 
 const fetchProducts = async () => {
     const { data, error } = await supabase
-        .from('products')
-        .select('*');
-
-    if (error) {
-        console.error(error);
-    } else {
-        store.dispatch(setProducts(data));
-    }
+    .from('products')
+    .select(`
+      id, code, batch, name, stock, category, purchase_cost, total_price, price, discount, rating, short_description, affiliate_link, created_at, updated_at,
+      images (url)
+    `);
+  
+  if (error) {
+    console.error('Error fetching products with images:', error);
+  } else {
+    store.dispatch(setProducts(data));
+  }
+  
 };
 
 fetchProducts();

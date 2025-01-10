@@ -37,7 +37,6 @@ const Button = styled.button`
 `;
 
 const ProductViewModal = ({ product, onClose }) => {
-  // Extraer categorías y tags en arrays simples de nombres
   const categoryNames = product.product_categories ? product.product_categories.map(pc => pc.category.name) : [];
   const tagNames = product.product_tags ? product.product_tags.map(pt => pt.tag.name) : [];
 
@@ -58,14 +57,13 @@ const ProductViewModal = ({ product, onClose }) => {
         <p><strong>Etiquetas:</strong> {tagNames.join(', ')}</p>
         <p><strong>Enlace de Afiliado:</strong> <a href={product.affiliate_link} target="_blank" rel="noopener noreferrer">{product.affiliate_link}</a></p>
 
-        {/* Mostrar imágenes */}
         {product.images && product.images.length > 0 && (
           <div>
             <h4>Imágenes:</h4>
             {product.images.map((img, index) => (
               <img
                 key={index}
-                src={img.url} 
+                src={img.url}
                 alt={`Imagen ${index + 1}`}
                 style={{ maxWidth: '100%', maxHeight: '200px', display: 'block', marginBottom: '10px' }}
               />
@@ -73,7 +71,6 @@ const ProductViewModal = ({ product, onClose }) => {
           </div>
         )}
 
-        {/* Variaciones */}
         {product.variations && product.variations.length > 0 && (
           <div>
             <h4>Variaciones:</h4>

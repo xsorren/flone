@@ -19,7 +19,7 @@ const Cart = () => {
     currencySymbol: "$",
     currencyName: "USD",
     currencyRate: 1
-}  
+  }  
   const { cartItems } = useSelector((state) => state.cart);
 
   return (
@@ -74,6 +74,13 @@ const Cart = () => {
                                   finalDiscountedPrice * cartItem.quantity)
                               : (cartTotalPrice +=
                                   finalProductPrice * cartItem.quantity);
+                            
+                            // Verificar la existencia de imágenes
+                            const hasImages = Array.isArray(cartItem.images) && cartItem.images.length > 0;
+                            const imageUrl = hasImages 
+                              ? cartItem.images[0].url 
+                              : "/assets/img/no-imagen.png";
+
                             return (
                               <tr key={key}>
                                 <td className="product-thumbnail">
@@ -88,9 +95,9 @@ const Cart = () => {
                                       className="img-fluid"
                                       src={
                                         process.env.PUBLIC_URL +
-                                        cartItem.image[0]
+                                        imageUrl
                                       }
-                                      alt=""
+                                      alt={cartItem.name || "Imagen del producto"}
                                     />
                                   </Link>
                                 </td>

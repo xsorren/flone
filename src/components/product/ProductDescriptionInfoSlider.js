@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { stringToArray } from "../../helpers/stringToArray"; // <--- Importa aquí
 import { getProductCartQuantity } from "../../helpers/product";
 import Rating from "./sub-components/ProductRating";
 import { addToCart } from "../../store/slices/cart-slice";
@@ -14,10 +15,11 @@ const ProductDescriptionInfoSlider = ({
   finalDiscountedPrice,
   finalProductPrice,
   cartItems,
-  wishlistItem,
-  
+  wishlistItem
 }) => {
   const dispatch = useDispatch();
+
+  // Variation logic
   const [selectedProductColor, setSelectedProductColor] = useState(
     product.variation ? product.variation[0].color : ""
   );
@@ -36,9 +38,14 @@ const ProductDescriptionInfoSlider = ({
     selectedProductSize
   );
 
+  // Parse category & tag to arrays
+  const categoryArray = stringToArray(product.category);
+  const tagArray = stringToArray(product.tag);
+
   return (
     <div className="product-details-content pro-details-slider-content">
       <h2>{product.name}</h2>
+
       <div className="product-details-price justify-content-center">
         {discountedPrice !== null ? (
           <Fragment>
@@ -51,19 +58,20 @@ const ProductDescriptionInfoSlider = ({
           <span>{currency.currencySymbol + finalProductPrice} </span>
         )}
       </div>
+
       {product.rating && product.rating > 0 ? (
         <div className="pro-details-rating-wrap justify-content-center">
           <div className="pro-details-rating mr-0">
             <Rating ratingValue={product.rating} />
           </div>
         </div>
-      ) : (
-        ""
-      )}
+      ) : null}
+
       <div className="pro-details-list">
         <p>{product.shortDescription}</p>
       </div>
 
+      {/* Variation logic if any */}
       {product.variation ? (
         <div className="pro-details-size-color justify-content-center">
           <div className="pro-details-color-wrap">
@@ -95,44 +103,44 @@ const ProductDescriptionInfoSlider = ({
               })}
             </div>
           </div>
-{/*          <div className="pro-details-size">
+          {/* Tamaño (descomentado si deseas mostrarlo) */}
+          {/*
+          <div className="pro-details-size">
             <span>Size</span>
             <div className="pro-details-size-content">
-              {product.variation &&
-                product.variation.map(single => {
-                  return single.color === selectedProductColor
-                    ? single.size.map((singleSize, key) => {
-                        return (
-                          <label
-                            className={`pro-details-size-content--single`}
-                            key={key}
-                          >
-                            <input
-                              type="radio"
-                              value={singleSize.name}
-                              checked={
-                                singleSize.name === selectedProductSize
-                                  ? "checked"
-                                  : ""
-                              }
-                              onChange={() => {
-                                setSelectedProductSize(singleSize.name);
-                                setProductStock(singleSize.stock);
-                                setQuantityCount(1);
-                              }}
-                            />
-                            <span className="size-name">{singleSize.name}</span>
-                          </label>
-                        );
-                      })
-                    : "";
-                })}
+              {product.variation.map((single) =>
+                single.color === selectedProductColor
+                  ? single.size.map((singleSize, key) => (
+                      <label
+                        className={`pro-details-size-content--single`}
+                        key={key}
+                      >
+                        <input
+                          type="radio"
+                          value={singleSize.name}
+                          checked={
+                            singleSize.name === selectedProductSize
+                              ? "checked"
+                              : ""
+                          }
+                          onChange={() => {
+                            setSelectedProductSize(singleSize.name);
+                            setProductStock(singleSize.stock);
+                            setQuantityCount(1);
+                          }}
+                        />
+                        <span className="size-name">{singleSize.name}</span>
+                      </label>
+                    ))
+                  : null
+              )}
             </div>
-          </div>*/}
+          </div>
+          */}
         </div>
-      ) : (
-        ""
-      )}
+      ) : null}
+
+      {/* Botones (comprar, carrito, wishlist) */}
       {product.affiliateLink ? (
         <div className="pro-details-quality justify-content-center">
           <div className="pro-details-cart btn-hover ml-0">
@@ -179,17 +187,18 @@ const ProductDescriptionInfoSlider = ({
             {productStock && productStock > 0 ? (
               <button
                 onClick={() =>
-                  dispatch(addToCart({
-                    ...product,
-                    quantity: quantityCount,
-                    selectedProductColor: selectedProductColor ? selectedProductColor : product.selectedProductColor ? product.selectedProductColor : null,
-                    selectedProductSize: selectedProductSize ? selectedProductSize : product.selectedProductSize ? product.selectedProductSize : null
-                  }))
+                  dispatch(
+                    addToCart({
+                      ...product,
+                      quantity: quantityCount,
+                      selectedProductColor: selectedProductColor || null,
+                      selectedProductSize: selectedProductSize || null
+                    })
+                  )
                 }
                 disabled={productCartQty >= productStock}
               >
-                {" "}
-                Añadir al carrito{" "}
+                Añadir al carrito
               </button>
             ) : (
               <button disabled>Agotado</button>
@@ -211,43 +220,40 @@ const ProductDescriptionInfoSlider = ({
           </div>
         </div>
       )}
-      {product.category ? (
+
+      {/* Categorías */}
+      {categoryArray.length > 0 && (
         <div className="pro-details-meta justify-content-center">
           <span>Categorías:</span>
           <ul>
-            {product.category.map((single, key) => {
-              return (
-                <li key={key}>
-                  <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
-                    {single}
-                  </Link>
-                </li>
-              );
-            })}
+            {categoryArray.map((single, key) => (
+              <li key={key}>
+                <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+                  {single}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
-      ) : (
-        ""
       )}
-      {product.tag ? (
+
+      {/* Etiquetas */}
+      {tagArray.length > 0 && (
         <div className="pro-details-meta justify-content-center">
           <span>Etiquetas:</span>
           <ul>
-            {product.tag.map((single, key) => {
-              return (
-                <li key={key}>
-                  <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
-                    {single}
-                  </Link>
-                </li>
-              );
-            })}
+            {tagArray.map((single, key) => (
+              <li key={key}>
+                <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+                  {single}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
-      ) : (
-        ""
       )}
 
+      {/* Redes sociales */}
       <div className="pro-details-social">
         <ul className="justify-content-center">
           <li>
@@ -268,12 +274,21 @@ const ProductDescriptionInfoSlider = ({
 
 ProductDescriptionInfoSlider.propTypes = {
   cartItems: PropTypes.array,
-  
-  currency: PropTypes.shape({}),
+  currency: PropTypes.shape({
+    currencySymbol: PropTypes.string,
+    currencyRate: PropTypes.number
+  }),
   discountedPrice: PropTypes.number,
   finalDiscountedPrice: PropTypes.number,
   finalProductPrice: PropTypes.number,
-  product: PropTypes.shape({}),
+  product: PropTypes.shape({
+    category: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+    tag: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+    variation: PropTypes.array,
+    rating: PropTypes.number,
+    affiliateLink: PropTypes.string,
+    stock: PropTypes.number
+  }),
   wishlistItem: PropTypes.shape({})
 };
 

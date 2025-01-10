@@ -41,9 +41,9 @@ const LogoutButton = styled.button`
   }
 `;
 
-const Actions = styled.div`
-  margin-bottom: 15px;
+const ActionsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 `;
 
@@ -117,7 +117,6 @@ const Button = styled.button`
 
   &.edit {
     background-color: #52c41a;
-
     &:hover {
       background-color: #73d13d;
     }
@@ -125,7 +124,6 @@ const Button = styled.button`
 
   &.delete {
     background-color: #ff4d4f;
-
     &:hover {
       background-color: #ff7875;
     }
@@ -133,18 +131,10 @@ const Button = styled.button`
 
   &.view {
     background-color: #1890ff;
-
     &:hover {
       background-color: #40a9ff;
     }
   }
-`;
-
-// Añade este estilo para el contenedor de acciones
-const ActionsContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
 `;
 
 const ProductList = () => {
@@ -163,21 +153,22 @@ const ProductList = () => {
   }, []);
 
   const fetchProducts = async () => {
+    // Consulta con left join implícito (sin !inner)
     const { data, error } = await supabase
-      .from('products')
-      .select(`
-        id, code, name, stock, batch, purchase_cost, total_price, price, discount, short_description, affiliate_link,
-        product_categories!inner(category_id),
-        product_tags!inner(tag_id),
-        variations:variations(id, color, variation_sizes(name, stock)),
-        images(url)
-      `);
-    if (error) {
-      console.error(error);
-    } else {
-      // Ajusta el formateo de datos si es necesario, ya que ahora data viene de la base de datos Postgres
-      setProducts(data);
-    }
+    .from('products')
+    .select(`
+      id, code, batch, name, stock, category, purchase_cost, total_price, price, discount, rating, short_description, affiliate_link, created_at, updated_at,
+      images (url)
+    `);
+  
+  if (error) {
+    console.error('Error fetching products with images:', error);
+  } else {
+    console.log('Fetched products with images:', data);
+    setProducts(data); // Asegúrate de actualizar el estado con los datos obtenidos
+
+  }
+  
   };
 
   const handleCreateProduct = () => {
@@ -278,37 +269,45 @@ const ProductList = () => {
           </Tr>
         </thead>
         <tbody>
-          {products.map((product) => (
-            <Tr key={product.id}>
-              {multiSelect && (
-                <Td>
-                  <input
-                    type="checkbox"
-                    checked={selectedProducts.includes(product.id)}
-                    onChange={() => handleSelectProduct(product.id)}
-                  />
-                </Td>
-              )}
-              <Td>{product.code}</Td>
-              <Td>{product.name}</Td>
-              <Td>{product.stock}</Td>
-              <ActionsCell>
-                {!multiSelect && (
-                  <>
-                    <Button className="edit" onClick={() => handleEditProduct(product)}>
-                      Editar
-                    </Button>
-                    <Button className="delete" onClick={() => handleDeleteProduct(product.id)}>
-                      Eliminar
-                    </Button>
-                    <Button className="view" onClick={() => handleViewProduct(product)}>
-                      Ver
-                    </Button>
-                  </>
+          {products && products.length > 0 ? (
+            products.map((product) => (
+              <Tr key={product.id}>
+                {multiSelect && (
+                  <Td>
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.includes(product.id)}
+                      onChange={() => handleSelectProduct(product.id)}
+                    />
+                  </Td>
                 )}
-              </ActionsCell>
+                <Td>{product.code || 'Sin código'}</Td>
+                <Td>{product.name}</Td>
+                <Td>{product.stock || 0}</Td>
+                <ActionsCell>
+                  {!multiSelect && (
+                    <>
+                      <Button className="edit" onClick={() => handleEditProduct(product)}>
+                        Editar
+                      </Button>
+                      <Button className="delete" onClick={() => handleDeleteProduct(product.id)}>
+                        Eliminar
+                      </Button>
+                      <Button className="view" onClick={() => handleViewProduct(product)}>
+                        Ver
+                      </Button>
+                    </>
+                  )}
+                </ActionsCell>
+              </Tr>
+            ))
+          ) : (
+            <Tr>
+              <Td colSpan={multiSelect ? 5 : 4} style={{ textAlign: 'center', padding: '20px' }}>
+                No hay productos disponibles.
+              </Td>
             </Tr>
-          ))}
+          )}
         </tbody>
       </Table>
 

@@ -2,15 +2,15 @@ import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getDiscountPrice } from "../../../helpers/product";
-import { deleteFromCart } from "../../../store/slices/cart-slice"
+import { deleteFromCart } from "../../../store/slices/cart-slice";
 
 const MenuCart = () => {
   const dispatch = useDispatch();
   const currency = {
     currencySymbol: "$",
     currencyName: "USD",
-    currencyRate: 1
-}
+    currencyRate: 1,
+  };
   const { cartItems } = useSelector((state) => state.cart);
   let cartTotalPrice = 0;
 
@@ -35,13 +35,18 @@ const MenuCart = () => {
                 ? (cartTotalPrice += finalDiscountedPrice * item.quantity)
                 : (cartTotalPrice += finalProductPrice * item.quantity);
 
+              const hasImages = Array.isArray(item.images) && item.images.length > 0;
+              const imageUrl = hasImages ? item.images[0].url : "/assets/img/no-imagen.png";
+
+              console.log("Image URL:", process.env.PUBLIC_URL + imageUrl);
+
               return (
                 <li className="single-shopping-cart" key={item.cartItemId}>
                   <div className="shopping-cart-img">
                     <Link to={process.env.PUBLIC_URL + "/product/" + item.id}>
                       <img
-                        alt=""
-                        src={process.env.PUBLIC_URL + item.image[0]}
+                        alt={item.name || "No disponible"}
+                        src={process.env.PUBLIC_URL + imageUrl}
                         className="img-fluid"
                       />
                     </Link>
@@ -72,7 +77,9 @@ const MenuCart = () => {
                     )}
                   </div>
                   <div className="shopping-cart-delete">
-                    <button onClick={() => dispatch(deleteFromCart(item.cartItemId))}>
+                    <button
+                      onClick={() => dispatch(deleteFromCart(item.cartItemId))}
+                    >
                       <i className="fa fa-times-circle" />
                     </button>
                   </div>

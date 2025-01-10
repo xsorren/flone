@@ -2,7 +2,6 @@ import React, { Fragment } from "react";
 import SEO from "../../components/seo";
 import LayoutOne from "../../layouts/LayoutOne";
 import HeroSliderThirtyTwo from "../../wrappers/hero-slider/HeroSliderThirtyTwo";
-import FeatureIconEight from "../../wrappers/feature-icon/FeatureIconEight";
 import TabProductNineteen from "../../wrappers/product/TabProductNineteen";
 import BrandLogoSliderFour from "../../wrappers/brand-logo/BrandLogoSliderFour";
 import CtaTwo from "../../wrappers/cta/CtaTwo";

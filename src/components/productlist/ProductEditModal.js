@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
 import { supabase } from '../../utils/supabaseClient';
-import { uploadToS3 } from '../../utils/s3Client';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -110,7 +109,6 @@ const ProductEditModal = ({ product, onClose }) => {
 
   const [images, setImages] = useState([]);
   const [currentImages, setCurrentImages] = useState(product.images || []);
-  const bucketName = process.env.REACT_APP_S3_BUCKET;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -149,27 +147,40 @@ const ProductEditModal = ({ product, onClose }) => {
       return;
     }
 
-    // Subir nuevas imágenes
-    for (const image of images) {
-      const filePath = `products/${product.id}/${image.name}`;
-      try {
-        await uploadToS3(bucketName, filePath, image);
-        const imageUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
+    // Subir nuevas imágenes (opcional, si quieres mantener esta lógica)
+    // Si ya obtienes url publica directamente al subir a Supabase, puedes hacerlo aquí
+    if (images.length > 0) {
+      // Ejemplo simple, asumiendo que subes la imagen usando supabase.storage
+      for (const image of images) {
+        const filePath = `products/${product.id}/${image.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, image);
 
-        const { data: insertedImages, error: imageInsertError } = await supabase.from('images').insert({
-          product_id: product.id,
-          url: imageUrl
-        }).select();
+        if (uploadError) {
+          console.error(uploadError);
+          toast.error(`Error al subir la imagen ${image.name}`);
+          continue;
+        }
+
+        // Obtener URL pública
+        const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(filePath);
+
+        // Insertar registro en la tabla images
+        const { data: insertedImages, error: imageInsertError } = await supabase
+          .from('images')
+          .insert({
+            product_id: product.id,
+            url: publicUrl
+          })
+          .select();
 
         if (imageInsertError) {
           console.error(imageInsertError);
-          toast.error('Error al guardar imagen en la BD');
+          toast.error('Error al guardar la imagen en la BD');
         } else {
           setCurrentImages([...currentImages, ...insertedImages]);
         }
-      } catch (err) {
-        console.error(err);
-        toast.error(`Error al subir la imagen ${image.name}`);
       }
     }
 
@@ -178,7 +189,6 @@ const ProductEditModal = ({ product, onClose }) => {
   };
 
   const handleDeleteProduct = async () => {
-    // Eliminar producto
     const { error: deleteError } = await supabase.from('products').delete().eq('id', product.id);
     if (deleteError) {
       console.error(deleteError);
@@ -193,11 +203,7 @@ const ProductEditModal = ({ product, onClose }) => {
     const imgToDelete = currentImages.find((img) => img.id === imgId);
     if (!imgToDelete) return;
 
-    // Opcionalmente, podrías eliminar el archivo S3, 
-    // pero Supabase Storage no exige esto; basta con borrarlo de la BD.
-    // Si quieres eliminarlo también de Storage, necesitarías
-    // usar DeleteObjectCommand del SDK S3 con el Key correspondiente.
-
+    // Eliminar el registro de la imagen de la BD
     const { error: imageDeleteError } = await supabase.from('images').delete().eq('id', imgId);
     if (imageDeleteError) {
       console.error(imageDeleteError);
@@ -325,7 +331,7 @@ const ProductEditModal = ({ product, onClose }) => {
             )}
           </div>
 
-          <div className="upload-images">
+          <div className="upload-images" style={{ marginTop: '10px' }}>
             <h4>Subir Nuevas Imágenes:</h4>
             <Input type="file" multiple accept="image/*" onChange={handleImagesChange} />
           </div>

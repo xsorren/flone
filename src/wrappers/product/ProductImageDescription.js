@@ -1,28 +1,20 @@
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import clsx from "clsx";
-import { getDiscountPrice } from "../../helpers/product";
 import ProductImageGallery from "../../components/product/ProductImageGallery";
 import ProductDescriptionInfo from "../../components/product/ProductDescriptionInfo";
 import ProductImageGallerySideThumb from "../../components/product/ProductImageGallerySideThumb";
 import ProductImageFixed from "../../components/product/ProductImageFixed";
+import { useEffect } from "react";
 
 const ProductImageDescription = ({ spaceTopClass, spaceBottomClass, galleryType, product }) => {
-  const currency = {
-    currencySymbol: "$",
-    currencyName: "USD",
-    currencyRate: 1
-}
   const { cartItems } = useSelector((state) => state.cart);
   const { wishlistItems } = useSelector((state) => state.wishlist);
   const wishlistItem = wishlistItems.find(item => item.id === product.id);
-
-  const discountedPrice = getDiscountPrice(product.price, product.discount);
-  const finalProductPrice = +(product.price * currency.currencyRate).toFixed(2);
-  const finalDiscountedPrice = +(
-    discountedPrice * currency.currencyRate
-  ).toFixed(2);
-
+  useEffect(() => {
+    console.log(product);
+  }
+  , []);
   return (
     <div className={clsx("shop-area", spaceTopClass, spaceBottomClass)}>
       <div className="container">
@@ -46,10 +38,6 @@ const ProductImageDescription = ({ spaceTopClass, spaceBottomClass, galleryType,
             {/* product description info */}
             <ProductDescriptionInfo
               product={product}
-              discountedPrice={discountedPrice}
-              currency={currency}
-              finalDiscountedPrice={finalDiscountedPrice}
-              finalProductPrice={finalProductPrice}
               cartItems={cartItems}
               wishlistItem={wishlistItem}
             />
@@ -62,7 +50,9 @@ const ProductImageDescription = ({ spaceTopClass, spaceBottomClass, galleryType,
 
 ProductImageDescription.propTypes = {
   galleryType: PropTypes.string,
-  product: PropTypes.shape({}),
+  product: PropTypes.shape({
+    name: PropTypes.string.isRequired
+  }),
   spaceBottomClass: PropTypes.string,
   spaceTopClass: PropTypes.string,
 };

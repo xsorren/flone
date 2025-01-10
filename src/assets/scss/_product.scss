@@ -289,9 +289,6 @@
 
       visibility: hidden;
 
-      transition-duration: 0.7s;
-      transform: translate(-50%, 20px);
-
       opacity: 0;
     }
     .product-action {
@@ -315,14 +312,8 @@
 
         height: 48px;
 
-        transition: all 0.5s ease;
-        transform: translateY(20px);
-
         opacity: 0;
         background-color: $theme-color;
-        // &:hover {
-        //     background-color: #000;
-        // }
       }
       .pro-wishlist {
         width: 48px;
@@ -333,14 +324,10 @@
         font-size: 14px;
 
         width: calc(100% - 48px - 48px);
-
-        transition-delay: 0.1s;
       }
       .pro-quickview {
         width: 48px;
         margin: 0;
-
-        transition-delay: 0.2s;
 
         border-left: 1px solid rgba(255, 255, 255, 0.2);
       }
@@ -429,18 +416,10 @@
     }
   }
   &:hover .hover-img {
-    visibility: visible;
-
-    transform: translate(-50%, 0);
-
-    opacity: 1;
+    // Eliminar reglas de hover
   }
   &:hover .product-action > div {
-    visibility: visible;
-
-    transform: translateY(0);
-
-    opacity: 1;
+    // Eliminar reglas de hover
   }
 }
 
@@ -1617,22 +1596,16 @@
     }
   }
   &:hover .hover-img {
-    visibility: visible;
-
-    transform: translateX(0);
-
-    opacity: 1;
+    // Eliminar reglas de hover
   }
   &:hover .default-img {
-    visibility: hidden;
-
-    transform: translateX(-100%);
+    // Eliminar reglas de hover
   }
   &:hover .product-action-2 a {
-    transform: scaleX(1);
+    // Eliminar reglas de hover
   }
   &:hover .product-action-2 button {
-    transform: scaleX(1);
+    // Eliminar reglas de hover
   }
   &.pro-glaucous-color {
     .product-img {
@@ -1976,11 +1949,7 @@
     }
   }
   &:hover .product-content-3-wrap {
-    visibility: visible;
-
-    transform: scale(1);
-
-    opacity: 1;
+    // Eliminar reglas de hover
   }
 }
 
@@ -2174,7 +2143,7 @@
     }
   }
   &:hover a img {
-    transform: scale(1.1);
+    // Eliminar reglas de hover
   }
 }
 
@@ -2272,7 +2241,7 @@
     }
   }
   &:hover a img {
-    transform: scale(1.1);
+    // Eliminar reglas de hover
   }
 }
 
@@ -2327,7 +2296,7 @@
     padding: 10px;
 
     transition: all 0.5s ease 0s;
-    transform: scaleY(0);
+    transform: none;
     text-align: center;
 
     opacity: 1;
@@ -2407,9 +2376,7 @@
     }
   }
   &:hover .product-action-4 {
-    transform: scaleY(1);
-
-    opacity: 1;
+    // Eliminar reglas de hover
   }
 }
 
@@ -2600,7 +2567,7 @@
         margin: 0 3px;
 
         transition: all 0.4s ease-in-out;
-        transform: scaleX(0);
+        transform: none;
         text-align: center;
 
         color: #fff;
@@ -2727,18 +2694,14 @@
     }
   }
   &:hover .hover-img {
-    visibility: visible;
-
-    transform: translateX(0);
-
-    opacity: 1;
+    // Eliminar reglas de hover
   }
 
   &:hover .product-action-2 a {
-    transform: scaleX(1);
+    // Eliminar reglas de hover
   }
   &:hover .product-action-2 button {
-    transform: scaleX(1);
+    // Eliminar reglas de hover
   }
 }
 
@@ -2942,7 +2905,7 @@
       width: 100%;
 
       transition: all 0.5s ease-in-out;
-      transform: translateX(100%);
+      transform: none;
 
       opacity: 0;
     }
@@ -2967,7 +2930,7 @@
         margin: 0 3px;
 
         transition: all 0.4s ease-in-out;
-        transform: scaleX(0);
+        transform: none;
         text-align: center;
 
         color: #555;
@@ -3088,18 +3051,14 @@
     }
   }
   &:hover .hover-img {
-    visibility: visible;
-
-    transform: translateX(0);
-
-    opacity: 1;
+    // Eliminar reglas de hover
   }
 
   &:hover .product-action-2 a {
-    transform: scaleX(1);
+    // Eliminar reglas de hover
   }
   &:hover .product-action-2 button {
-    transform: scaleX(1);
+    // Eliminar reglas de hover
   }
 }
 
@@ -3134,7 +3093,7 @@
       width: 100%;
 
       transition: all 0.5s ease-in-out;
-      transform: translateX(100%);
+      transform: none;
 
       opacity: 0;
     }
@@ -3162,7 +3121,7 @@
         margin: 3px 0;
 
         transition: all 0.4s ease-in-out;
-        transform: translateX(-200px);
+        transform: none;
         text-align: center;
 
         color: #fff;
@@ -3274,22 +3233,16 @@
     }
   }
   &:hover .hover-img {
-    visibility: visible;
-
-    transform: translateX(0);
-
-    opacity: 1;
+    // Eliminar reglas de hover
   }
   &:hover .default-img {
-    visibility: hidden;
-
-    transform: translateX(-100%);
+    // Eliminar reglas de hover
   }
   &:hover .product-action-2 a {
-    transform: translateX(0);
+    // Eliminar reglas de hover
   }
   &:hover .product-action-2 button {
-    transform: translateX(0);
+    // Eliminar reglas de hover
   }
 
 
@@ -3369,7 +3322,7 @@
       width: 100%;
 
       transition: all 0.5s ease 0s;
-      transform: scale(1);
+      transform: none;
     }
   }
   .collection-content-2 {
@@ -3392,7 +3345,7 @@
     }
   }
   &:hover a img {
-    transform: scale(1.1);
+    // Eliminar reglas de hover
   }
 }
 

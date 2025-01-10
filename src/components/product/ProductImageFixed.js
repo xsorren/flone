@@ -1,31 +1,33 @@
 import PropTypes from "prop-types";
 
-
 const ProductImageFixed = ({ product }) => {
+  const hasDiscount = product.discount && product.discount > 0;
+  const isNew = product.new;
+
   return (
     <div className="product-large-image-wrapper">
-      {product.discount || product.new ? (
+      {(hasDiscount || isNew) && (
         <div className="product-img-badges">
-          {product.discount ? (
+          {hasDiscount ? (
             <span className="pink">-{product.discount}%</span>
-          ) : (
-            ""
-          )}
-          {product.new ? <span className="purple">New</span> : ""}
+          ) : null}
+          {isNew ? <span className="purple">New</span> : null}
         </div>
-      ) : (
-        ""
       )}
 
       <div className="product-fixed-image">
-        {product.image ? (
+        {product.images && product.images.length > 0 ? (
           <img
-            src={process.env.PUBLIC_URL + product.image[0]}
-            alt=""
+            src={process.env.PUBLIC_URL + product.images[0].url}
+            alt={product.name || "No disponible"}
             className="img-fluid"
           />
         ) : (
-          ""
+          <img
+            src="/assets/img/no-imagen.png"
+            alt="No disponible"
+            className="img-fluid"
+          />
         )}
       </div>
     </div>
@@ -33,7 +35,9 @@ const ProductImageFixed = ({ product }) => {
 };
 
 ProductImageFixed.propTypes = {
-  product: PropTypes.shape({})
+  product: PropTypes.shape({
+    name: PropTypes.string.isRequired
+  })
 };
 
 export default ProductImageFixed;

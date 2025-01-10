@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { stringToArray } from "../../helpers/stringToArray"; // <--- Importa aquí
 import { getProductCartQuantity } from "../../helpers/product";
 import Rating from "./sub-components/ProductRating";
 import { addToCart } from "../../store/slices/cart-slice";
@@ -9,24 +10,23 @@ import { addToWishlist } from "../../store/slices/wishlist-slice";
 
 const ProductDescriptionInfo = ({
   product,
-  discountedPrice,
-  currency,
-  finalDiscountedPrice,
-  finalProductPrice,
   cartItems,
   wishlistItem,
-  
+  currency
 }) => {
   const dispatch = useDispatch();
-  const [selectedProductColor, setSelectedProductColor] = useState(
-    product.variation ? product.variation[0].color : ""
-  );
-  const [selectedProductSize, setSelectedProductSize] = useState(
-    product.variation ? product.variation[0].size[0].name : ""
-  );
-  const [productStock, setProductStock] = useState(
-    product.variation ? product.variation[0].size[0].stock : product.stock
-  );
+
+  const hasVariation =
+    product.variation &&
+    Array.isArray(product.variation) &&
+    product.variation.length > 0;
+  const defaultColor = hasVariation ? product.variation[0].color : null;
+  const defaultSize = hasVariation ? product.variation[0].size[0]?.name : null;
+  const defaultStock = hasVariation ? product.variation[0].size[0]?.stock : product.stock;
+
+  const [selectedProductColor, setSelectedProductColor] = useState(defaultColor);
+  const [selectedProductSize, setSelectedProductSize] = useState(defaultSize);
+  const [productStock, setProductStock] = useState(defaultStock ?? 0);
   const [quantityCount, setQuantityCount] = useState(1);
 
   const productCartQty = getProductCartQuantity(
@@ -36,103 +36,113 @@ const ProductDescriptionInfo = ({
     selectedProductSize
   );
 
+  // Manejo de currency (opcional)
+  const currencySymbol = currency?.currencySymbol || "$";
+  const currencyRate = currency?.currencyRate || 1;
+  const finalProductPrice = (product.price || 0) * currencyRate;
+
+  // Convierto las categorías y etiquetas a array si son strings
+  const categoryArray = stringToArray(product.category); 
+  const tagArray = stringToArray(product.tag);
+
   return (
     <div className="product-details-content ml-70">
+      {/* Nombre del producto */}
       <h2>{product.name}</h2>
-      <div className="product-details-price">
-        {discountedPrice !== null ? (
-          <Fragment>
-            <span>{currency.currencySymbol + finalDiscountedPrice}</span>{" "}
-            <span className="old">
-              {currency.currencySymbol + finalProductPrice}
-            </span>
-          </Fragment>
-        ) : (
-          <span>{currency.currencySymbol + finalProductPrice} </span>
-        )}
-      </div>
+
+      {/* Precio del producto */}
+      {product.price !== undefined && (
+        <div className="pro-details-price">
+          <span>
+            {currencySymbol}
+            {finalProductPrice.toFixed(2)}
+          </span>
+        </div>
+      )}
+
+      {/* Rating (si existe) */}
       {product.rating && product.rating > 0 ? (
         <div className="pro-details-rating-wrap">
           <div className="pro-details-rating">
             <Rating ratingValue={product.rating} />
           </div>
         </div>
-      ) : (
-        ""
-      )}
-      <div className="pro-details-list">
-        <p>{product.shortDescription}</p>
-      </div>
+      ) : null}
 
-      {product.variation ? (
+      {/* Descripción corta */}
+      {product.shortDescription && (
+        <div className="pro-details-list">
+          <p>{product.shortDescription}</p>
+        </div>
+      )}
+
+      {/* Variaciones (color, tamaño) si existen */}
+      {hasVariation && (
         <div className="pro-details-size-color">
           <div className="pro-details-color-wrap">
             <span>Color</span>
             <div className="pro-details-color-content">
-              {product.variation.map((single, key) => {
-                return (
-                  <label
-                    className={`pro-details-color-content--single ${single.color}`}
-                    key={key}
-                  >
-                    <input
-                      type="radio"
-                      value={single.color}
-                      name="product-color"
-                      checked={
-                        single.color === selectedProductColor ? "checked" : ""
-                      }
-                      onChange={() => {
-                        setSelectedProductColor(single.color);
+              {product.variation.map((single, key) => (
+                <label
+                  className={`pro-details-color-content--single ${single.color}`}
+                  key={key}
+                >
+                  <input
+                    type="radio"
+                    value={single.color}
+                    name="product-color"
+                    checked={single.color === selectedProductColor}
+                    onChange={() => {
+                      setSelectedProductColor(single.color);
+                      if (single.size && single.size.length > 0) {
                         setSelectedProductSize(single.size[0].name);
-                        setProductStock(single.size[0].stock);
-                        setQuantityCount(1);
-                      }}
-                    />
-                    <span className="checkmark"></span>
-                  </label>
-                );
-              })}
+                        setProductStock(single.size[0].stock ?? 0);
+                      } else {
+                        setProductStock(product.stock ?? 0);
+                      }
+                      setQuantityCount(1);
+                    }}
+                  />
+                  <span className="checkmark"></span>
+                </label>
+              ))}
             </div>
           </div>
-          <div className="pro-details-size">
-            <span>Size</span>
-            <div className="pro-details-size-content">
-              {product.variation &&
-                product.variation.map(single => {
-                  return single.color === selectedProductColor
-                    ? single.size.map((singleSize, key) => {
-                        return (
-                          <label
-                            className={`pro-details-size-content--single`}
-                            key={key}
-                          >
-                            <input
-                              type="radio"
-                              value={singleSize.name}
-                              checked={
-                                singleSize.name === selectedProductSize
-                                  ? "checked"
-                                  : ""
-                              }
-                              onChange={() => {
-                                setSelectedProductSize(singleSize.name);
-                                setProductStock(singleSize.stock);
-                                setQuantityCount(1);
-                              }}
-                            />
-                            <span className="size-name">{singleSize.name}</span>
-                          </label>
-                        );
-                      })
-                    : "";
-                })}
+
+          {/* Selección de Tamaño (si existe) */}
+          {product.variation.some(v => v.size && v.size.length > 0) && (
+            <div className="pro-details-size">
+              <span>Tamaño</span>
+              <div className="pro-details-size-content">
+                {product.variation.map(single =>
+                  single.color === selectedProductColor
+                    ? single.size.map((singleSize, key) => (
+                        <label
+                          className="pro-details-size-content--single"
+                          key={key}
+                        >
+                          <input
+                            type="radio"
+                            value={singleSize.name}
+                            checked={singleSize.name === selectedProductSize}
+                            onChange={() => {
+                              setSelectedProductSize(singleSize.name);
+                              setProductStock(singleSize.stock ?? 0);
+                              setQuantityCount(1);
+                            }}
+                          />
+                          <span className="size-name">{singleSize.name}</span>
+                        </label>
+                      ))
+                    : null
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
-      ) : (
-        ""
       )}
+
+      {/* Botones de Comprar, Añadir al carrito y Wishlist */}
       {product.affiliateLink ? (
         <div className="pro-details-quality">
           <div className="pro-details-cart btn-hover ml-0">
@@ -147,6 +157,7 @@ const ProductDescriptionInfo = ({
         </div>
       ) : (
         <div className="pro-details-quality">
+          {/* Controles de cantidad */}
           <div className="cart-plus-minus">
             <button
               onClick={() =>
@@ -165,7 +176,7 @@ const ProductDescriptionInfo = ({
             <button
               onClick={() =>
                 setQuantityCount(
-                  quantityCount < productStock - productCartQty
+                  quantityCount < (productStock ?? 0) - productCartQty
                     ? quantityCount + 1
                     : quantityCount
                 )
@@ -175,29 +186,34 @@ const ProductDescriptionInfo = ({
               +
             </button>
           </div>
+
+          {/* Añadir al Carrito */}
           <div className="pro-details-cart btn-hover">
             {productStock && productStock > 0 ? (
               <button
                 onClick={() =>
-                  dispatch(addToCart({
-                    ...product,
-                    quantity: quantityCount,
-                    selectedProductColor: selectedProductColor ? selectedProductColor : product.selectedProductColor ? product.selectedProductColor : null,
-                    selectedProductSize: selectedProductSize ? selectedProductSize : product.selectedProductSize ? product.selectedProductSize : null
-                  }))
+                  dispatch(
+                    addToCart({
+                      ...product,
+                      quantity: quantityCount,
+                      selectedProductColor: selectedProductColor || null,
+                      selectedProductSize: selectedProductSize || null
+                    })
+                  )
                 }
                 disabled={productCartQty >= productStock}
               >
-                {" "}
-                Añadir al carrito{" "}
+                Añadir al carrito
               </button>
             ) : (
               <button disabled>Agotado</button>
             )}
           </div>
+
+          {/* Wishlist */}
           <div className="pro-details-wishlist">
             <button
-              className={wishlistItem !== undefined ? "active" : ""}
+              className={wishlistItem ? "active" : ""}
               disabled={wishlistItem !== undefined}
               title={
                 wishlistItem !== undefined
@@ -211,43 +227,40 @@ const ProductDescriptionInfo = ({
           </div>
         </div>
       )}
-      {product.category ? (
+
+      {/* Categorías (texto convertido a array) */}
+      {categoryArray.length > 0 && (
         <div className="pro-details-meta">
           <span>Categorías :</span>
           <ul>
-            {product.category.map((single, key) => {
-              return (
-                <li key={key}>
-                  <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
-                    {single}
-                  </Link>
-                </li>
-              );
-            })}
+            {categoryArray.map((cat, key) => (
+              <li key={key}>
+                <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+                  {cat}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
-      ) : (
-        ""
       )}
-      {product.tag ? (
+
+      {/* Etiquetas (texto convertido a array) */}
+      {tagArray.length > 0 && (
         <div className="pro-details-meta">
           <span>Etiquetas :</span>
           <ul>
-            {product.tag.map((single, key) => {
-              return (
-                <li key={key}>
-                  <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
-                    {single}
-                  </Link>
-                </li>
-              );
-            })}
+            {tagArray.map((t, key) => (
+              <li key={key}>
+                <Link to={process.env.PUBLIC_URL + "/shop-grid-standard"}>
+                  {t}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
-      ) : (
-        ""
       )}
 
+      {/* Redes sociales */}
       <div className="pro-details-social">
         <ul>
           <li>
@@ -268,13 +281,25 @@ const ProductDescriptionInfo = ({
 
 ProductDescriptionInfo.propTypes = {
   cartItems: PropTypes.array,
-  
-  currency: PropTypes.shape({}),
-  discountedPrice: PropTypes.number,
-  finalDiscountedPrice: PropTypes.number,
-  finalProductPrice: PropTypes.number,
-  product: PropTypes.shape({}),
-  wishlistItem: PropTypes.shape({})
+  product: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    shortDescription: PropTypes.string,
+    category: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.array // si tienes legacy
+    ]),
+    tag: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+    rating: PropTypes.number,
+    variation: PropTypes.array,
+    stock: PropTypes.number,
+    affiliateLink: PropTypes.string
+  }),
+  wishlistItem: PropTypes.shape({}),
+  currency: PropTypes.shape({
+    currencySymbol: PropTypes.string,
+    currencyRate: PropTypes.number
+  })
 };
 
 export default ProductDescriptionInfo;

@@ -6,6 +6,26 @@ import clsx from "clsx";
 import ProductModal from "./ProductModal";
 import { addToCart } from "../../store/slices/cart-slice";
 import { addToWishlist } from "../../store/slices/wishlist-slice";
+import styled from "styled-components";
+
+// Estilos para el contenedor de la imagen, aplicando zoom en hover
+const ImageContainer = styled.div`
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 400px; /* Aumentamos la altura a 400px */
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.1); /* Zoom suave */
+  }
+`;
 
 const ProductGridSingleTen = ({
   product,
@@ -20,47 +40,37 @@ const ProductGridSingleTen = ({
 
   const hasImages = product.images && product.images.length > 0;
   const mainImage = hasImages ? product.images[0].url : "/assets/img/no-imagen.png";
-  const hoverImage = hasImages && product.images.length > 1 ? product.images[1].url : null;
 
   return (
     <Fragment>
       <div className={clsx("product-wrap-10", spaceBottomClass, colorClass, productGridStyleClass)}>
         <div className="product-img">
           <Link to={process.env.PUBLIC_URL + "/product/" + product.id}>
-            <img
-              className="default-img"
-              src={mainImage}
-              alt=""
-            />
-            {hoverImage ? (
+            <ImageContainer>
               <img
-                className="hover-img"
-                src={hoverImage}
-                alt=""
+                className="default-img"
+                src={mainImage}
+                alt={product.name}
               />
-            ) : (
-              ""
-            )}
+            </ImageContainer>
           </Link>
 
-          {/* Badge si aplica */}
-          {(product.discount || product.new) && (
-            <div className="product-img-badges">
-              {product.discount ? <span>-{product.discount}%</span> : ""}
-              {product.new ? <span>New</span> : ""}
-            </div>
-          )}
+          {/* Removemos el badge de descuento y "New" */}
+          {/* Si se necesitara quitar el descuento pero mantener "New", podríamos conditionar, 
+             pero el usuario ha pedido quitar el descuento. Asumimos quitar ambos badges. */}
+          {/* <div className="product-img-badges">
+            {product.new && <span>New</span>}
+          </div> */}
 
           <div className="product-action-2">
-            {product.affiliateLink ? (
+            {product.affiliate_link ? (
               <a
-                href={product.affiliateLink}
+                href={product.affiliate_link}
                 rel="noopener noreferrer"
                 target="_blank"
                 title="Comprar ahora"
               >
-                {" "}
-                <i className="fa fa-shopping-cart"></i>{" "}
+                <i className="fa fa-shopping-cart"></i>
               </a>
             ) : product.variation && product.variation.length >= 1 ? (
               <Link
@@ -82,8 +92,7 @@ const ProductGridSingleTen = ({
                   cartItem !== undefined ? "Añadido al carrito" : "Añadir al carrito"
                 }
               >
-                {" "}
-                <i className="fa fa-shopping-cart"></i>{" "}
+                <i className="fa fa-shopping-cart"></i>
               </button>
             ) : (
               <button disabled className="active" title="Agotado">
@@ -115,7 +124,7 @@ const ProductGridSingleTen = ({
                 {product.name}
               </Link>
             </h3>
-            {/* Se elimina cualquier referencia a precio */}
+            {/* Sin precio ni descuento */}
           </div>
         </div>
       </div>
@@ -132,10 +141,13 @@ const ProductGridSingleTen = ({
 
 ProductGridSingleTen.propTypes = {
   cartItem: PropTypes.shape({}),
-  product: PropTypes.shape({}),
-  sliderClassName: PropTypes.string,
+  product: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    images: PropTypes.array
+  }),
   spaceBottomClass: PropTypes.string,
   colorClass: PropTypes.string,
+  productGridStyleClass: PropTypes.string,
   wishlistItem: PropTypes.shape({})
 };
 
