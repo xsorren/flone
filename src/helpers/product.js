@@ -51,50 +51,48 @@ export const cartItemStock = (item, color, size) => {
 // get products based on category, tag, color, size, etc.
 export const getSortedProducts = (products, sortType, sortValue) => {
   if (!Array.isArray(products)) return [];
+  // Si no hay criterio de filtrado/orden, devolvemos el listado completo
   if (!sortType || !sortValue) return products;
 
   switch (sortType) {
     case "category":
       return products.filter(product => {
-        const cat = product.category ?? [];
-        return Array.isArray(cat) && cat.includes(sortValue);
+        // Convertimos el string de la categoría en array.
+        const catArr = stringToArray(product.category);
+        return catArr.includes(sortValue);
       });
 
     case "tag":
       return products.filter(product => {
-        const tags = product.tag ?? [];
-        return Array.isArray(tags) && tags.includes(sortValue);
+        const tagArr = stringToArray(product.tag);
+        return tagArr.includes(sortValue);
       });
 
     case "color":
       return products.filter(product => {
-        const variations = product.variation ?? [];
-        return variations.some(single => single.color === sortValue);
+        const colorArr = stringToArray(product.color);
+        return colorArr.includes(sortValue);
       });
 
     case "size":
       return products.filter(product => {
-        const variations = product.variation ?? [];
-        return variations.some(variation =>
-          Array.isArray(variation.size) &&
-          variation.size.some(singleSize => singleSize.name === sortValue)
-        );
+        const sizeArr = stringToArray(product.size);
+        return sizeArr.includes(sortValue);
       });
 
     case "filterSort":
+      // Aquí puedes mantener el código para ordenar por precio, rating, etc.
       let sortProducts = [...products];
       if (sortValue === "default") {
         return sortProducts;
       }
       if (sortValue === "priceHighToLow") {
-        // Si no hay price, consideramos price=0
         return sortProducts.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
       }
       if (sortValue === "priceLowToHigh") {
         return sortProducts.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
       }
       if (sortValue === "topRated") {
-        // Si no hay rating, consideramos rating=0
         return sortProducts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
       }
       return sortProducts;

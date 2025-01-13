@@ -15,10 +15,6 @@ const HeroSliderThirtyTwoSingle = ({ data }) => {
                 className="animated no-style"
                 dangerouslySetInnerHTML={{ __html: data.title }}
               />
-              <h1
-                className="animated"
-                dangerouslySetInnerHTML={{ __html: data.subtitle }}
-              />
               <div className="slider-btn-blue btn-hover">
                 <Link
                   className="animated"

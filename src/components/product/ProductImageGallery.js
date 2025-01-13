@@ -126,7 +126,7 @@ ProductImageGallery.propTypes = {
     name: PropTypes.string.isRequired,
     images: PropTypes.array,
     price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    shortDescription: PropTypes.string,
+    short_description: PropTypes.string,
     discount: PropTypes.number,
     new: PropTypes.bool,
   }),

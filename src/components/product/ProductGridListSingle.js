@@ -143,13 +143,6 @@ const ProductGridListSingle = ({
             </Link>
           </h3>
 
-          {/* Rating */}
-          {product.rating && product.rating > 0 && (
-            <div className="product-rating">
-              <Rating ratingValue={product.rating} />
-            </div>
-          )}
-
           {/* Precio (Grid) */}
           {product.price !== undefined && (
             <div className="product-price">
@@ -195,7 +188,7 @@ const ProductGridListSingle = ({
               )}
 
               {/* Descripción corta */}
-              {product.shortDescription && <p>{product.shortDescription}</p>}
+              {product.short_description && <p>{product.short_description}</p>}
 
               {/* Precio (List) */}
               {product.price !== undefined && (
@@ -291,7 +284,7 @@ ProductGridListSingle.propTypes = {
     id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     name: PropTypes.string,
     price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    shortDescription: PropTypes.string,
+    short_description: PropTypes.string,
     images: PropTypes.array,
     rating: PropTypes.number,
     stock: PropTypes.number,

@@ -71,7 +71,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     totalPrice: 0,
     price: 0,
     discount: 0,
-    shortDescription: '',
+    short_description: '',
     category: [], // ingresadas separadas por comas
     tag: [], // ingresadas separadas por comas
     affiliateLink: ''
@@ -201,7 +201,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
           total_price: Number(formData.totalPrice),
           price: Number(formData.price),
           discount: Number(formData.discount),
-          short_description: formData.shortDescription,
+          short_description: formData.short_description,
           affiliate_link: formData.affiliateLink
         }])
         .select();
@@ -329,9 +329,9 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
             onChange={handleChange}
           />
           <Textarea
-            name="shortDescription"
+            name="short_description"
             placeholder="Descripción Corta"
-            value={formData.shortDescription}
+            value={formData.short_description}
             onChange={handleChange}
           ></Textarea>
 

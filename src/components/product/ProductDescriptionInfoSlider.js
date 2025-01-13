@@ -68,7 +68,7 @@ const ProductDescriptionInfoSlider = ({
       ) : null}
 
       <div className="pro-details-list">
-        <p>{product.shortDescription}</p>
+        <p>{product.short_description}</p>
       </div>
 
       {/* Variation logic if any */}

@@ -239,9 +239,9 @@ function ProductModal({ product, show, onHide, wishlistItem, currency }) {
               )}
 
               {/* ======= Descripción corta ======= */}
-              {product.shortDescription && (
+              {product.short_description && (
                 <div className="pro-details-list">
-                  <p>{product.shortDescription}</p>
+                  <p>{product.short_description}</p>
                 </div>
               )}
 
@@ -469,7 +469,7 @@ ProductModal.propTypes = {
     name: PropTypes.string.isRequired,
     images: PropTypes.array,
     price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    shortDescription: PropTypes.string,
+    short_description: PropTypes.string,
     category: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
     tag: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
     variation: PropTypes.array,

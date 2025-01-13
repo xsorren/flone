@@ -101,7 +101,7 @@ const ProductEditModal = ({ product, onClose }) => {
     totalPrice: product.total_price || 0,
     price: product.price || 0,
     discount: product.discount || 0,
-    shortDescription: product.short_description || '',
+    short_description: product.short_description || '',
     category: product.category || [],
     tag: product.tag || [],
     affiliateLink: product.affiliate_link || '',
@@ -136,7 +136,7 @@ const ProductEditModal = ({ product, onClose }) => {
         total_price: Number(formData.totalPrice),
         price: Number(formData.price),
         discount: Number(formData.discount),
-        short_description: formData.shortDescription,
+        short_description: formData.short_description,
         affiliate_link: formData.affiliateLink
       })
       .eq('id', product.id);
@@ -279,9 +279,9 @@ const ProductEditModal = ({ product, onClose }) => {
             onChange={handleChange}
           />
           <Textarea
-            name="shortDescription"
+            name="short_description"
             placeholder="Descripción Corta"
-            value={formData.shortDescription}
+            value={formData.short_description}
             onChange={handleChange}
           ></Textarea>
           <Input

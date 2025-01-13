@@ -29,6 +29,7 @@ const ImageContainer = styled.div`
 
 const ProductGridSingleTen = ({
   product,
+  currency,
   cartItem,
   wishlistItem,
   spaceBottomClass,
@@ -40,6 +41,11 @@ const ProductGridSingleTen = ({
 
   const hasImages = product.images && product.images.length > 0;
   const mainImage = hasImages ? product.images[0].url : "/assets/img/no-imagen.png";
+
+  // Si utilizas currency:
+  const currencySymbol = currency?.currencySymbol || "$";
+  const currencyRate = currency?.currencyRate || 1;
+  const finalProductPrice = (product.price || 0) * currencyRate;
 
   return (
     <Fragment>
@@ -124,7 +130,15 @@ const ProductGridSingleTen = ({
                 {product.name}
               </Link>
             </h3>
-            {/* Sin precio ni descuento */}
+            {/* Precio */}
+            {product.price !== undefined && (
+              <div className="product-price">
+                <span>
+                  {currencySymbol}
+                  {finalProductPrice.toFixed(2)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -140,10 +154,16 @@ const ProductGridSingleTen = ({
 };
 
 ProductGridSingleTen.propTypes = {
+  currency: PropTypes.shape({
+    currencySymbol: PropTypes.string,
+    currencyRate: PropTypes.number
+  }),
   cartItem: PropTypes.shape({}),
   product: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     name: PropTypes.string.isRequired,
-    images: PropTypes.array
+    images: PropTypes.array,
+    price: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
   }),
   spaceBottomClass: PropTypes.string,
   colorClass: PropTypes.string,
