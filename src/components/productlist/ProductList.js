@@ -2,10 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import ProductEditModal from './ProductEditModal';
 import ProductViewModal from './ProductViewModal';
+import ProductCreateModal from './ProductCreateModal';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import ProductCreateModal from './ProductCreateModal';
 import { supabase } from '../../utils/supabaseClient';
+
+// Para procesar archivos Excel
+import * as XLSX from 'xlsx';
 
 // Styled Components
 const Container = styled.div`
@@ -45,6 +48,7 @@ const ActionsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-bottom: 20px;
 `;
 
 const ActionButton = styled.button`
@@ -148,29 +152,74 @@ const ProductList = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const navigate = useNavigate();
 
+  // Para manejar el archivo Excel
+  const [excelFile, setExcelFile] = useState(null);
+
   useEffect(() => {
     fetchProducts();
   }, []);
 
+  // 1. Traer productos con sus imágenes (left join).
   const fetchProducts = async () => {
-    // Consulta con left join implícito (sin !inner)
     const { data, error } = await supabase
-    .from('products')
-    .select(`
-      id, code, batch, name, stock, category, purchase_cost, total_price, price, discount, rating, short_description, affiliate_link, created_at, updated_at,
-      images (url)
-    `);
-  
-  if (error) {
-    console.error('Error fetching products with images:', error);
-  } else {
-    console.log('Fetched products with images:', data);
-    setProducts(data); // Asegúrate de actualizar el estado con los datos obtenidos
+      .from('products')
+      .select(`
+        id, code, batch, name, stock, category, purchase_cost, total_price, price, discount, rating, short_description, affiliate_link, created_at, updated_at,
+        images (id, url)
+      `);
 
-  }
-  
+    if (error) {
+      console.error('Error fetching products with images:', error);
+    } else {
+      console.log('Fetched products with images:', data);
+      setProducts(data || []);
+    }
   };
 
+  // ==============================
+  // Manejo de archivo Excel
+  // ==============================
+  const handleFileChange = (e) => {
+    setExcelFile(e.target.files[0]);
+  };
+
+  const handleUploadExcel = async () => {
+    if (!excelFile) return;
+
+    try {
+      // Leer el archivo como ArrayBuffer
+      const data = await excelFile.arrayBuffer();
+      // Parsear con SheetJS
+      const workbook = XLSX.read(data);
+      // Tomar la primera hoja
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      // Convertir a JSON
+      const excelData = XLSX.utils.sheet_to_json(worksheet);
+
+      // Insertar todos los productos en Supabase
+      // Ajusta los campos según tu Excel. Supongamos que
+      // las columnas del Excel coinciden con las de "products"
+      const { data: newProducts, error } = await supabase
+        .from('products')
+        .insert(excelData);
+
+      if (error) {
+        console.error('Error subiendo productos desde Excel:', error);
+        alert('Error subiendo productos desde Excel. Revisa la consola.');
+      } else {
+        console.log('Productos subidos:', newProducts);
+        alert('Productos subidos correctamente');
+        fetchProducts();
+      }
+    } catch (err) {
+      console.error('Error al procesar el Excel:', err);
+      alert('Error al procesar el archivo Excel. Revisa la consola.');
+    }
+  };
+
+  // ==============================
+  // Manejo de creación y edición
+  // ==============================
   const handleCreateProduct = () => {
     setShowCreateModal(true);
   };
@@ -180,6 +229,9 @@ const ProductList = () => {
     fetchProducts();
   };
 
+  // ==============================
+  // Manejo de selección múltiple
+  // ==============================
   const handleSelectProduct = (productId) => {
     if (selectedProducts.includes(productId)) {
       setSelectedProducts(selectedProducts.filter((id) => id !== productId));
@@ -190,10 +242,15 @@ const ProductList = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedProducts.length === 0) return;
+
+    // Antes de borrar de la tabla products, borremos las imágenes asociadas
+    await deleteImagesForProducts(selectedProducts);
+
     const { error } = await supabase
       .from('products')
       .delete()
       .in('id', selectedProducts);
+
     if (!error) {
       fetchProducts();
       setSelectedProducts([]);
@@ -203,8 +260,18 @@ const ProductList = () => {
     }
   };
 
+  // ==============================
+  // Manejo de borrado individual
+  // ==============================
   const handleDeleteProduct = async (id) => {
-    const { error } = await supabase.from('products').delete().eq('id', id);
+    // Borrar imágenes asociadas primero
+    await deleteImagesForProducts([id]);
+
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
     if (error) {
       console.error(error);
     } else {
@@ -212,6 +279,54 @@ const ProductList = () => {
     }
   };
 
+  // Función auxiliar para borrar imágenes de la DB y del bucket
+  const deleteImagesForProducts = async (productIds) => {
+    // 1. Traer todas las imágenes asociadas a los productos
+    const { data: imagesData, error } = await supabase
+      .from('images')
+      .select('*')
+      .in('product_id', productIds);
+
+    if (error) {
+      console.error('Error fetching images before delete:', error);
+      return;
+    }
+
+    if (!imagesData || imagesData.length === 0) return;
+
+    // 2. Borrar los archivos del bucket
+    // Para ello, necesitamos las rutas exactas en `product-images`.
+    // Asumimos que la URL pública es algo como:
+    //   https://<tuProyecto>.supabase.co/storage/v1/object/public/product-images/products/<id>/...
+    // Necesitamos extraer la parte "products/<id>/imagenes/..."
+    for (const img of imagesData) {
+      if (!img.url) continue;
+
+      // Sacar la parte final de la URL (ruta del archivo en el bucket).
+      // Ejemplo de URL: 
+      //   https://xxxx.supabase.co/storage/v1/object/public/product-images/products/123/imagen1.png
+      // Necesitamos "products/123/imagen1.png"
+      // Ajusta esta expresión regular según tu dominio:
+      const pathMatch = img.url.match(/product-images\/(.+)$/);
+      if (pathMatch && pathMatch[1]) {
+        const path = pathMatch[1];
+        // Borrarlo del bucket
+        await supabase.storage
+          .from('product-images')
+          .remove([path]);
+      }
+    }
+
+    // 3. Borrar los registros de la tabla images
+    await supabase
+      .from('images')
+      .delete()
+      .in('id', imagesData.map((img) => img.id));
+  };
+
+  // ==============================
+  // Manejo de edición / vista
+  // ==============================
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     setShowEditModal(true);
@@ -237,7 +352,10 @@ const ProductList = () => {
       <ActionsContainer>
         {multiSelect ? (
           <>
-            <ActionButton className="delete-selected" onClick={handleDeleteSelected}>
+            <ActionButton
+              className="delete-selected"
+              onClick={handleDeleteSelected}
+            >
               Eliminar Seleccionados
             </ActionButton>
             <ActionButton
@@ -252,10 +370,31 @@ const ProductList = () => {
           </>
         ) : (
           <>
-            <ActionButton onClick={() => setMultiSelect(true)}>Seleccionar Múltiples</ActionButton>
-            <ActionButton onClick={handleCreateProduct}>Crear Nuevo Producto</ActionButton>
+            <ActionButton onClick={() => setMultiSelect(true)}>
+              Seleccionar Múltiples
+            </ActionButton>
+            <ActionButton onClick={handleCreateProduct}>
+              Crear Nuevo Producto
+            </ActionButton>
           </>
         )}
+
+        {/* Botón para subir archivo Excel */}
+        <ActionButton>
+          <label htmlFor="excelFile" style={{ cursor: 'pointer' }}>
+            Subir Excel
+          </label>
+        </ActionButton>
+        <input
+          id="excelFile"
+          type="file"
+          accept=".xlsx, .xls"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+        <ActionButton onClick={handleUploadExcel}>
+          Procesar Excel
+        </ActionButton>
       </ActionsContainer>
 
       <Table>
@@ -287,13 +426,22 @@ const ProductList = () => {
                 <ActionsCell>
                   {!multiSelect && (
                     <>
-                      <Button className="edit" onClick={() => handleEditProduct(product)}>
+                      <Button
+                        className="edit"
+                        onClick={() => handleEditProduct(product)}
+                      >
                         Editar
                       </Button>
-                      <Button className="delete" onClick={() => handleDeleteProduct(product.id)}>
+                      <Button
+                        className="delete"
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
                         Eliminar
                       </Button>
-                      <Button className="view" onClick={() => handleViewProduct(product)}>
+                      <Button
+                        className="view"
+                        onClick={() => handleViewProduct(product)}
+                      >
                         Ver
                       </Button>
                     </>
@@ -303,7 +451,10 @@ const ProductList = () => {
             ))
           ) : (
             <Tr>
-              <Td colSpan={multiSelect ? 5 : 4} style={{ textAlign: 'center', padding: '20px' }}>
+              <Td
+                colSpan={multiSelect ? 5 : 4}
+                style={{ textAlign: 'center', padding: '20px' }}
+              >
                 No hay productos disponibles.
               </Td>
             </Tr>
@@ -331,8 +482,12 @@ const ProductList = () => {
           }}
         />
       )}
+
       {showCreateModal && (
-        <ProductCreateModal onClose={handleCloseCreateModal} refreshProducts={fetchProducts} />
+        <ProductCreateModal
+          onClose={handleCloseCreateModal}
+          refreshProducts={fetchProducts}
+        />
       )}
     </Container>
   );

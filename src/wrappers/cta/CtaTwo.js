@@ -15,10 +15,10 @@ const CtaTwo = ({ spaceTopClass, spaceBottomClass }) => {
         <div className="row">
           <div className="col-lg-6 ms-auto me-auto">
             <div className="cta-content text-center">
-              <h2 className="title">
+              <h2 className="title" style={{color:"#282828"}}>
                 Calidad en Materiales de Construcción
               </h2>
-              <p className="text">
+              <p className="text" style={{color:"#282828"}}>
               Encuentra todo lo que necesitas para tus proyectos.
               </p>
               <Link

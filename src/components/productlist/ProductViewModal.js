@@ -37,8 +37,13 @@ const Button = styled.button`
 `;
 
 const ProductViewModal = ({ product, onClose }) => {
-  const categoryNames = product.product_categories ? product.product_categories.map(pc => pc.category.name) : [];
-  const tagNames = product.product_tags ? product.product_tags.map(pt => pt.tag.name) : [];
+  // Si tuvieras otras relaciones (ej. product_categories, product_tags), las podrías mostrar.
+  const categoryNames = product.product_categories
+    ? product.product_categories.map((pc) => pc.category.name)
+    : [];
+  const tagNames = product.product_tags
+    ? product.product_tags.map((pt) => pt.tag.name)
+    : [];
 
   return (
     <ModalOverlay>
@@ -55,7 +60,12 @@ const ProductViewModal = ({ product, onClose }) => {
         <p><strong>Descripción Corta:</strong> {product.short_description}</p>
         <p><strong>Categorías:</strong> {categoryNames.join(', ')}</p>
         <p><strong>Etiquetas:</strong> {tagNames.join(', ')}</p>
-        <p><strong>Enlace de Afiliado:</strong> <a href={product.affiliate_link} target="_blank" rel="noopener noreferrer">{product.affiliate_link}</a></p>
+        <p>
+          <strong>Enlace de Afiliado:</strong>{' '}
+          <a href={product.affiliate_link} target="_blank" rel="noopener noreferrer">
+            {product.affiliate_link}
+          </a>
+        </p>
 
         {product.images && product.images.length > 0 && (
           <div>
@@ -65,7 +75,12 @@ const ProductViewModal = ({ product, onClose }) => {
                 key={index}
                 src={img.url}
                 alt={`Imagen ${index + 1}`}
-                style={{ maxWidth: '100%', maxHeight: '200px', display: 'block', marginBottom: '10px' }}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '200px',
+                  display: 'block',
+                  marginBottom: '10px',
+                }}
               />
             ))}
           </div>

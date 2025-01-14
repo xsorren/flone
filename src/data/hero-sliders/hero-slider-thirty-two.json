@@ -3,14 +3,14 @@
     "id": 1,
     "title": "Don Mauricio Materiales",
     "subtitle": "",
-    "image": "/assets/img/slider/wall_1.jpg",
+    "image": "/assets/img/slider/wall_2.jpg",
     "url": "/shop-grid-standard"
   },
   {
     "id": 2,
     "title": "Explorá nuestro catálogo",
     "subtitle": "Text 2",
-    "image": "/assets/img/slider/wall_2.jpg",
+    "image": "/assets/img/slider/wall_1.jpg",
     "url": "/shop-grid-standard"
   }
 ]

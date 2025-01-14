@@ -30,6 +30,11 @@ const Form = styled.form`
   flex-direction: column;
 `;
 
+const Label = styled.label`
+  margin-bottom: 5px;
+  font-weight: bold;
+`;
+
 const Input = styled.input`
   margin-bottom: 10px;
   padding: 8px;
@@ -147,10 +152,8 @@ const ProductEditModal = ({ product, onClose }) => {
       return;
     }
 
-    // Subir nuevas imágenes (opcional, si quieres mantener esta lógica)
-    // Si ya obtienes url publica directamente al subir a Supabase, puedes hacerlo aquí
+    // Subir nuevas imágenes (opcional)
     if (images.length > 0) {
-      // Ejemplo simple, asumiendo que subes la imagen usando supabase.storage
       for (const image of images) {
         const filePath = `products/${product.id}/${image.name}`;
         const { error: uploadError } = await supabase.storage
@@ -203,7 +206,6 @@ const ProductEditModal = ({ product, onClose }) => {
     const imgToDelete = currentImages.find((img) => img.id === imgId);
     if (!imgToDelete) return;
 
-    // Eliminar el registro de la imagen de la BD
     const { error: imageDeleteError } = await supabase.from('images').delete().eq('id', imgId);
     if (imageDeleteError) {
       console.error(imageDeleteError);
@@ -220,7 +222,9 @@ const ProductEditModal = ({ product, onClose }) => {
       <ModalContent>
         <h3>Editar Producto</h3>
         <Form onSubmit={handleSubmit}>
+          <Label htmlFor="code">Código:</Label>
           <Input
+            id="code"
             type="text"
             name="code"
             placeholder="Código"
@@ -228,14 +232,20 @@ const ProductEditModal = ({ product, onClose }) => {
             onChange={handleChange}
             required
           />
+          
+          <Label htmlFor="batch">Lote:</Label>
           <Input
+            id="batch"
             type="text"
             name="batch"
             placeholder="Lote"
             value={formData.batch}
             onChange={handleChange}
           />
+          
+          <Label htmlFor="name">Artículo:</Label>
           <Input
+            id="name"
             type="text"
             name="name"
             placeholder="Artículo"
@@ -243,62 +253,89 @@ const ProductEditModal = ({ product, onClose }) => {
             onChange={handleChange}
             required
           />
+          
+          <Label htmlFor="stock">Stock:</Label>
           <Input
+            id="stock"
             type="number"
             name="stock"
             placeholder="Stock"
             value={formData.stock}
             onChange={handleChange}
           />
+          
+          <Label htmlFor="purchaseCost">Costo de Compra:</Label>
           <Input
+            id="purchaseCost"
             type="number"
             name="purchaseCost"
             placeholder="Costo Compra"
             value={formData.purchaseCost}
             onChange={handleChange}
           />
+          
+          <Label htmlFor="totalPrice">Precio Total:</Label>
           <Input
+            id="totalPrice"
             type="number"
             name="totalPrice"
             placeholder="Precio Total"
             value={formData.totalPrice}
             onChange={handleChange}
           />
+          
+          <Label htmlFor="price">Precio de Venta:</Label>
           <Input
+            id="price"
             type="number"
             name="price"
             placeholder="Precio de Venta"
             value={formData.price}
             onChange={handleChange}
           />
+          
+          <Label htmlFor="discount">Descuento (%):</Label>
           <Input
+            id="discount"
             type="number"
             name="discount"
             placeholder="Descuento (%)"
             value={formData.discount}
             onChange={handleChange}
           />
+          
+          <Label htmlFor="short_description">Descripción Corta:</Label>
           <Textarea
+            id="short_description"
             name="short_description"
             placeholder="Descripción Corta"
             value={formData.short_description}
             onChange={handleChange}
           ></Textarea>
+          
+          <Label htmlFor="category">Categorías:</Label>
           <Input
+            id="category"
             type="text"
             name="category"
             placeholder="Categorías (separadas por comas)"
             value={Array.isArray(formData.category) ? formData.category.join(', ') : formData.category}
             onChange={handleChange}
           />
+          
+          <Label htmlFor="tag">Etiquetas:</Label>
           <Input
+            id="tag"
             type="text"
             name="tag"
             placeholder="Etiquetas (separadas por comas)"
             value={Array.isArray(formData.tag) ? formData.tag.join(', ') : formData.tag}
             onChange={handleChange}
           />
+          
+          <Label htmlFor="affiliateLink">Enlace de Afiliado:</Label>
           <Input
+            id="affiliateLink"
             type="text"
             name="affiliateLink"
             placeholder="Enlace de Afiliado"

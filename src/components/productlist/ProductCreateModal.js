@@ -31,6 +31,11 @@ const Form = styled.form`
   flex-direction: column;
 `;
 
+const Label = styled.label`
+  margin-bottom: 5px;
+  font-weight: bold;
+`;
+
 const Input = styled.input`
   margin-bottom: 10px;
   padding: 8px;
@@ -82,7 +87,10 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'category' || name === 'tag') {
-      setFormData({ ...formData, [name]: value.split(',').map((item) => item.trim()) });
+      setFormData({
+        ...formData,
+        [name]: value.split(',').map((item) => item.trim()),
+      });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -92,16 +100,20 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     setImages([...e.target.files]);
   };
 
+  // ==============================
+  // Lógica para crear categorías
+  // ==============================
   const insertCategories = async (productId, categories) => {
     for (const catName of categories) {
       if (catName === '') continue;
-      // Verificar si existe la categoría
+
       let { data: catData, error: catError } = await supabase
         .from('categories')
         .select('id')
         .eq('name', catName)
         .single();
 
+      // code PGRST116 => no rows returned
       if (catError && catError.code !== 'PGRST116') {
         console.error(catError);
         toast.error(`Error buscando la categoría ${catName}`);
@@ -139,10 +151,12 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     }
   };
 
+  // ==============================
+  // Lógica para crear tags
+  // ==============================
   const insertTags = async (productId, tags) => {
     for (const tagName of tags) {
       if (tagName === '') continue;
-      // Verificar si existe el tag
       let { data: tagData, error: tagError } = await supabase
         .from('tags')
         .select('id')
@@ -186,26 +200,31 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     }
   };
 
+  // ==============================
+  // Crear el producto + imágenes
+  // ==============================
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       // Crear producto
       const { data: productData, error: productError } = await supabase
         .from('products')
-        .insert([{
-          code: formData.code,
-          batch: formData.batch,
-          name: formData.name,
-          stock: Number(formData.stock),
-          purchase_cost: Number(formData.purchaseCost),
-          total_price: Number(formData.totalPrice),
-          price: Number(formData.price),
-          discount: Number(formData.discount),
-          short_description: formData.short_description,
-          affiliate_link: formData.affiliateLink
-        }])
+        .insert([
+          {
+            code: formData.code,
+            batch: formData.batch,
+            name: formData.name,
+            stock: Number(formData.stock),
+            purchase_cost: Number(formData.purchaseCost),
+            total_price: Number(formData.totalPrice),
+            price: Number(formData.price),
+            discount: Number(formData.discount),
+            short_description: formData.short_description,
+            affiliate_link: formData.affiliateLink,
+          },
+        ])
         .select();
-  
+
       if (productError) {
         console.error(productError);
         toast.error('Error al crear el producto');
@@ -240,13 +259,16 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
           }
 
           // Obtener URL pública
-          const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(filePath);
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from('product-images').getPublicUrl(filePath);
+
           // Insertar registro en tabla images
           const { error: imageInsertError } = await supabase
             .from('images')
             .insert({
               product_id: productId,
-              url: publicUrl
+              url: publicUrl,
             });
 
           if (imageInsertError) {
@@ -270,7 +292,9 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
       <ModalContent>
         <h3>Crear Nuevo Producto</h3>
         <Form onSubmit={handleSubmit}>
+          <Label htmlFor="code">Código:</Label>
           <Input
+            id="code"
             type="text"
             name="code"
             placeholder="Código"
@@ -278,14 +302,20 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
             onChange={handleChange}
             required
           />
+
+          <Label htmlFor="batch">Lote:</Label>
           <Input
+            id="batch"
             type="text"
             name="batch"
             placeholder="Lote"
             value={formData.batch}
             onChange={handleChange}
           />
+
+          <Label htmlFor="name">Artículo:</Label>
           <Input
+            id="name"
             type="text"
             name="name"
             placeholder="Artículo"
@@ -293,66 +323,97 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
             onChange={handleChange}
             required
           />
+
+          <Label htmlFor="stock">Stock:</Label>
           <Input
+            id="stock"
             type="number"
             name="stock"
             placeholder="Stock"
             value={formData.stock}
             onChange={handleChange}
           />
+
+          <Label htmlFor="purchaseCost">Costo de Compra:</Label>
           <Input
+            id="purchaseCost"
             type="number"
             name="purchaseCost"
             placeholder="Costo Compra"
             value={formData.purchaseCost}
             onChange={handleChange}
           />
+
+          <Label htmlFor="totalPrice">Precio Total:</Label>
           <Input
+            id="totalPrice"
             type="number"
             name="totalPrice"
             placeholder="Precio Total"
             value={formData.totalPrice}
             onChange={handleChange}
           />
+
+          <Label htmlFor="price">Precio de Venta:</Label>
           <Input
+            id="price"
             type="number"
             name="price"
             placeholder="Precio de Venta"
             value={formData.price}
             onChange={handleChange}
           />
+
+          <Label htmlFor="discount">Descuento (%):</Label>
           <Input
+            id="discount"
             type="number"
             name="discount"
             placeholder="Descuento (%)"
             value={formData.discount}
             onChange={handleChange}
           />
+
+          <Label htmlFor="short_description">Descripción Corta:</Label>
           <Textarea
+            id="short_description"
             name="short_description"
             placeholder="Descripción Corta"
             value={formData.short_description}
             onChange={handleChange}
           ></Textarea>
 
-          {/* Campo para categorías */}
+          <Label htmlFor="category">Categorías:</Label>
           <Input
+            id="category"
             type="text"
             name="category"
             placeholder="Categorías (separadas por comas)"
-            value={Array.isArray(formData.category) ? formData.category.join(', ') : formData.category}
-            onChange={handleChange}
-          />
-          {/* Campo para tags */}
-          <Input
-            type="text"
-            name="tag"
-            placeholder="Etiquetas (separadas por comas)"
-            value={Array.isArray(formData.tag) ? formData.tag.join(', ') : formData.tag}
+            value={
+              Array.isArray(formData.category)
+                ? formData.category.join(', ')
+                : formData.category
+            }
             onChange={handleChange}
           />
 
+          <Label htmlFor="tag">Etiquetas:</Label>
           <Input
+            id="tag"
+            type="text"
+            name="tag"
+            placeholder="Etiquetas (separadas por comas)"
+            value={
+              Array.isArray(formData.tag)
+                ? formData.tag.join(', ')
+                : formData.tag
+            }
+            onChange={handleChange}
+          />
+
+          <Label htmlFor="affiliateLink">Enlace de Afiliado:</Label>
+          <Input
+            id="affiliateLink"
             type="text"
             name="affiliateLink"
             placeholder="Enlace de Afiliado"
@@ -362,7 +423,12 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
 
           <div className="upload-images">
             <h4>Subir Imágenes:</h4>
-            <Input type="file" multiple accept="image/*" onChange={handleImagesChange} />
+            <Input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImagesChange}
+            />
           </div>
 
           <div style={{ marginTop: '10px' }}>
