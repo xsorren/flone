@@ -119,7 +119,7 @@ const Cart = () => {
                                         Color: {cartItem.selectedProductColor}
                                       </span>
                                       <span>
-                                        Size: {cartItem.selectedProductSize}
+                                        Tamaño: {cartItem.selectedProductSize}
                                       </span>
                                     </div>
                                   ) : (
@@ -256,7 +256,7 @@ const Cart = () => {
                         </span>
                       </h4>
                       <Link to={process.env.PUBLIC_URL + "/checkout"}>
-                        Proceder al Pago
+                      Realizar Pedido
                       </Link>
                     </div>
                   </div>

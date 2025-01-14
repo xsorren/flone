@@ -74,7 +74,7 @@ const ShopTopFilter = ({ products, getSortParams }) => {
           {/* Product Filter */}
 {/*          <div className="col-md-3 col-sm-6 col-xs-12 mb-30">
             <div className="product-filter">
-              <h5>Size</h5>
+              <h5>Tamaño</h5>
               {uniqueSizes ? (
                 <ul>
                   {uniqueSizes.map((size, key) => {

@@ -70,7 +70,7 @@ const MenuCart = () => {
                     item.selectedProductSize ? (
                       <div className="cart-item-variation">
                         <span>Color: {item.selectedProductColor}</span>
-                        <span>Size: {item.selectedProductSize}</span>
+                        <span>Tamaño: {item.selectedProductSize}</span>
                       </div>
                     ) : (
                       ""
@@ -103,7 +103,7 @@ const MenuCart = () => {
               className="default-btn"
               to={process.env.PUBLIC_URL + "/checkout"}
             >
-              Proceder al Pago
+              Realizar Pedido
             </Link>
           </div>
         </Fragment>

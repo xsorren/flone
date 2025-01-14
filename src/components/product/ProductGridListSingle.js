@@ -68,10 +68,13 @@ const ProductGridListSingle = ({
         <div className="product-img">
           <Link to={`${process.env.PUBLIC_URL}/product/${product.id}`}>
             {renderProductImage(true)}
-            {/* Si hay más de una imagen, mostramos la "hover-img" */}
-            {product.images && product.images.length > 1
+            {/* 
+              Si quieres mostrar solo la primera imagen, 
+              comenta la siguiente línea que llama a la imagen “hover-img”.
+            */}
+            {/* {product.images && product.images.length > 1
               ? renderProductImage(false)
-              : null}
+              : null} */}
           </Link>
 
           <div className="product-action">
@@ -163,9 +166,12 @@ const ProductGridListSingle = ({
               <div className="product-img">
                 <Link to={`${process.env.PUBLIC_URL}/product/${product.id}`}>
                   {renderProductImage(true)}
-                  {product.images && product.images.length > 1
+                  {/* 
+                    Comentar esta llamada para mostrar solo la primera imagen.
+                  */}
+                  {/* {product.images && product.images.length > 1
                     ? renderProductImage(false)
-                    : null}
+                    : null} */}
                 </Link>
               </div>
             </div>
@@ -258,7 +264,7 @@ const ProductGridListSingle = ({
             </div>
           </div>
         </div>
-      </div> 
+      </div>
 
       {/* Modal de Producto */}
       <ProductModal
