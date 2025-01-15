@@ -6,7 +6,11 @@ export const getProducts = (products, category, type, limit) => {
   // Actualmente devuelve todos los productos sin filtrar ni limitar.
   // Puedes agregar filtrados aquí si lo deseas, comprobando siempre
   // la existencia de los campos antes de usarlos.
-  return products || [];
+  let filteredProducts = products;
+  if (limit) {
+    filteredProducts = filteredProducts.slice(0, limit);
+  }
+  return filteredProducts || [];
 };
 
 // get product discount price

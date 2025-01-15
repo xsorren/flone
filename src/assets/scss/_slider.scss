@@ -742,12 +742,19 @@
     background-position: 42%;
   }
   @media #{$xs-layout} {
-    background-position: 30%;
+    .single-slider-2 {
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: auto;
+      min-height: 300px;
+    }
   }
   @media #{$sm-layout} {
     background-position: 22%;
   }
 }
+
 
 
 

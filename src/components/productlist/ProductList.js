@@ -185,7 +185,7 @@ const ProductList = () => {
 
   const handleUploadExcel = async () => {
     if (!excelFile) return;
-
+  
     try {
       // Leer el archivo como ArrayBuffer
       const data = await excelFile.arrayBuffer();
@@ -193,22 +193,65 @@ const ProductList = () => {
       const workbook = XLSX.read(data);
       // Tomar la primera hoja
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      // Convertir a JSON
+      // Convertir a JSON (cada fila del Excel será un objeto)
       const excelData = XLSX.utils.sheet_to_json(worksheet);
-
-      // Insertar todos los productos en Supabase
-      // Ajusta los campos según tu Excel. Supongamos que
-      // las columnas del Excel coinciden con las de "products"
+  
+      // Ahora mapeamos cada fila de Excel a la estructura de tu tabla "products"
+      // Ajusta los nombres de columna según tu Excel exacto
+      const mappedData = excelData.map((row) => {
+        // Si en Excel tienes un formato de precios con comas, puedes convertirlos a float.
+        // Por ejemplo, si "row['Precio Total']" viene como "10.160,00", necesitarás
+        // reemplazar el separador de miles/punto y convertir la coma decimal. 
+        // Ejemplo rápido de parseo (ajústalo según necesites):
+        const parseNumeric = (val) => {
+          if (!val) return 0;
+          // Quitar puntos de miles y reemplazar la coma decimal por punto
+          // "10.160,00" -> "10160.00"
+          const normalized = val.toString().replace(/\./g, '').replace(',', '.');
+          return parseFloat(normalized) || 0;
+        };
+  
+        return {
+          code: row['Codigo']?.toString() ?? '',
+          batch: row['Lote']?.toString() ?? '',
+          name: row['Articulo'] ?? '',
+  
+          // Stock como entero
+          stock: parseInt(row['Stock']) || 0,
+  
+          // Costo de compra (numérico)
+          purchase_cost: parseNumeric(row['Costo Compra']),
+  
+          // Precio total (numérico)
+          total_price: parseNumeric(row['Precio Total']),
+  
+          // Campos extra que no estén en el Excel, si quieres inicializarlos:
+          price: 0,
+          discount: 0,
+          rating: 0,
+          short_description: '',
+          affiliate_link: '',
+          category: '',
+          color: '',
+          size: '',
+          tag: '',
+          // Podrías agregar created_at y updated_at si quieres
+          // o confiar en un trigger o default de la DB.
+        };
+      });
+  
+      // Insertar todo en la tabla "products"
       const { data: newProducts, error } = await supabase
         .from('products')
-        .insert(excelData);
-
+        .insert(mappedData);
+  
       if (error) {
         console.error('Error subiendo productos desde Excel:', error);
         alert('Error subiendo productos desde Excel. Revisa la consola.');
       } else {
         console.log('Productos subidos:', newProducts);
         alert('Productos subidos correctamente');
+        // Volvemos a recargar la lista de productos
         fetchProducts();
       }
     } catch (err) {
@@ -216,6 +259,7 @@ const ProductList = () => {
       alert('Error al procesar el archivo Excel. Revisa la consola.');
     }
   };
+  
 
   // ==============================
   // Manejo de creación y edición

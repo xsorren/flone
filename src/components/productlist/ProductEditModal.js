@@ -222,6 +222,40 @@ const ProductEditModal = ({ product, onClose }) => {
       <ModalContent>
         <h3>Editar Producto</h3>
         <Form onSubmit={handleSubmit}>
+
+          {/* Sección de Imágenes movida al principio */}
+          <div className="image-section" style={{ marginBottom: '20px' }}>
+            <div className="current-images">
+              <h4>Imágenes Actuales:</h4>
+              {currentImages.length > 0 ? (
+                <ImageContainer>
+                  {currentImages.map((img) => (
+                    <ImageItem key={img.id}>
+                      <img
+                        src={img.url}
+                        alt="Imagen del producto"
+                        style={{ maxHeight: '100px', maxWidth: '100px' }}
+                      />
+                      <DeleteImageButton
+                        type="button"
+                        onClick={() => handleDeleteImage(img.id)}
+                      >
+                        &times;
+                      </DeleteImageButton>
+                    </ImageItem>
+                  ))}
+                </ImageContainer>
+              ) : (
+                <p>No hay imágenes actualmente.</p>
+              )}
+            </div>
+
+            <div className="upload-images" style={{ marginTop: '10px' }}>
+              <h4>Subir Nuevas Imágenes:</h4>
+              <Input type="file" multiple accept="image/*" onChange={handleImagesChange} />
+            </div>
+          </div>
+
           <Label htmlFor="code">Código:</Label>
           <Input
             id="code"
@@ -232,7 +266,7 @@ const ProductEditModal = ({ product, onClose }) => {
             onChange={handleChange}
             required
           />
-          
+
           <Label htmlFor="batch">Lote:</Label>
           <Input
             id="batch"
@@ -242,7 +276,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.batch}
             onChange={handleChange}
           />
-          
+
           <Label htmlFor="name">Artículo:</Label>
           <Input
             id="name"
@@ -253,7 +287,7 @@ const ProductEditModal = ({ product, onClose }) => {
             onChange={handleChange}
             required
           />
-          
+
           <Label htmlFor="stock">Stock:</Label>
           <Input
             id="stock"
@@ -263,7 +297,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.stock}
             onChange={handleChange}
           />
-          
+
           <Label htmlFor="purchaseCost">Costo de Compra:</Label>
           <Input
             id="purchaseCost"
@@ -273,7 +307,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.purchaseCost}
             onChange={handleChange}
           />
-          
+
           <Label htmlFor="totalPrice">Precio Total:</Label>
           <Input
             id="totalPrice"
@@ -283,7 +317,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.totalPrice}
             onChange={handleChange}
           />
-          
+
           <Label htmlFor="price">Precio de Venta:</Label>
           <Input
             id="price"
@@ -293,7 +327,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.price}
             onChange={handleChange}
           />
-          
+
           <Label htmlFor="discount">Descuento (%):</Label>
           <Input
             id="discount"
@@ -303,7 +337,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.discount}
             onChange={handleChange}
           />
-          
+
           <Label htmlFor="short_description">Descripción Corta:</Label>
           <Textarea
             id="short_description"
@@ -312,7 +346,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.short_description}
             onChange={handleChange}
           ></Textarea>
-          
+
           <Label htmlFor="category">Categorías:</Label>
           <Input
             id="category"
@@ -322,7 +356,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={Array.isArray(formData.category) ? formData.category.join(', ') : formData.category}
             onChange={handleChange}
           />
-          
+
           <Label htmlFor="tag">Etiquetas:</Label>
           <Input
             id="tag"
@@ -332,7 +366,7 @@ const ProductEditModal = ({ product, onClose }) => {
             value={Array.isArray(formData.tag) ? formData.tag.join(', ') : formData.tag}
             onChange={handleChange}
           />
-          
+
           <Label htmlFor="affiliateLink">Enlace de Afiliado:</Label>
           <Input
             id="affiliateLink"
@@ -342,36 +376,6 @@ const ProductEditModal = ({ product, onClose }) => {
             value={formData.affiliateLink}
             onChange={handleChange}
           />
-
-          <div className="current-images">
-            <h4>Imágenes Actuales:</h4>
-            {currentImages.length > 0 ? (
-              <ImageContainer>
-                {currentImages.map((img) => (
-                  <ImageItem key={img.id}>
-                    <img
-                      src={img.url}
-                      alt="Imagen del producto"
-                      style={{ maxHeight: '100px', maxWidth: '100px' }}
-                    />
-                    <DeleteImageButton
-                      type="button"
-                      onClick={() => handleDeleteImage(img.id)}
-                    >
-                      &times;
-                    </DeleteImageButton>
-                  </ImageItem>
-                ))}
-              </ImageContainer>
-            ) : (
-              <p>No hay imágenes actualmente.</p>
-            )}
-          </div>
-
-          <div className="upload-images" style={{ marginTop: '10px' }}>
-            <h4>Subir Nuevas Imágenes:</h4>
-            <Input type="file" multiple accept="image/*" onChange={handleImagesChange} />
-          </div>
 
           <div style={{ marginTop: '10px' }}>
             <Button type="submit">Guardar Cambios</Button>
