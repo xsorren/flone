@@ -60,15 +60,33 @@ const FooterOne = ({
             <div className="footer-col-3">
               <h3 style={{ fontFamily: "inherit" }}>SÍGUENOS</h3>
               <ul className="social-icons">
+                {/* <li>
+                  <a
+                    href="https://www.facebook.com/tuempresa"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i className="fa fa-facebook" style={{ fontSize: "24px" }} />
+                  </a>
+                </li> */}
                 <li>
-                  <i className="fa fa-facebook" style={{ fontSize: "24px" }} />
+                  <a
+                    href="https://www.instagram.com/donmauriciomateriales"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i className="fa fa-instagram" style={{ fontSize: "24px" }} />
+                  </a>
                 </li>
-                <li>
-                  <i className="fa fa-instagram" style={{ fontSize: "24px" }} />
-                </li>
-                <li>
-                  <i className="fa fa-youtube" style={{ fontSize: "24px" }} />
-                </li>
+                {/* <li>
+                  <a
+                    href="https://www.youtube.com/channel/tuempresa"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i className="fa fa-youtube" style={{ fontSize: "24px" }} />
+                  </a>
+                </li> */}
               </ul>
             </div>
           </div>

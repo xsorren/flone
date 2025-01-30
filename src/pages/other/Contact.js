@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import SEO from "../../components/seo";
 import LayoutOne from "../../layouts/LayoutOne";
 import Breadcrumb from "../../wrappers/breadcrumb/Breadcrumb";
-import GoogleMap from "../../components/google-map";
+import PigeonMap from "./PigeonMap";
 
 const Contact = () => {
   let { pathname } = useLocation();
@@ -24,8 +24,8 @@ const Contact = () => {
         />
         <div className="contact-area pt-100 pb-100">
           <div className="container">
-            <div className="contact-map mb-10">
-              <GoogleMap lat={-35.005274270659605} lng={-59.264683908597156} />
+          <div className="contact-map mb-10">
+              <PigeonMap lat={-35.005274270659605} lng={-59.264683908597156} />
             </div>
             <div className="custom-row-2">
               <div className="col-12 col-lg-4 col-md-5">
