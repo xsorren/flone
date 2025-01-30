@@ -98,32 +98,6 @@ const ShopTopFilter = ({ products, getSortParams }) => {
               )}
             </div>
           </div>*/}
-          {/* Product Filter */}
-          <div className="col-md-3 col-sm-6 col-xs-12 mb-30">
-            <div className="product-filter product-filter--tag">
-              <h5>Tag</h5>
-              {uniqueTags ? (
-                <ul>
-                  {uniqueTags.map((tag, key) => {
-                    return (
-                      <li key={key}>
-                        <button
-                          onClick={e => {
-                            getSortParams("tag", tag);
-                            setActiveSort(e);
-                          }}
-                        >
-                          {tag}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                "No tags found"
-              )}
-            </div>
-          </div>
         </div>
       </div>
     </div>

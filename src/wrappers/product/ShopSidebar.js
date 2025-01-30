@@ -10,7 +10,6 @@ import ShopSearch from "../../components/product/ShopSearch";
 import ShopCategories from "../../components/product/ShopCategories";
 import ShopColor from "../../components/product/ShopColor";
 import ShopSize from "../../components/product/ShopSize";
-import ShopTag from "../../components/product/ShopTag";
 
 const ShopSidebar = ({ products, getSortParams, sideSpaceClass }) => {
   const uniqueCategories = getIndividualCategories(products);
@@ -34,9 +33,6 @@ const ShopSidebar = ({ products, getSortParams, sideSpaceClass }) => {
 
       {/* filter by size */}
       <ShopSize sizes={uniqueSizes} getSortParams={getSortParams} />
-
-      {/* filter by tag */}
-      <ShopTag tags={uniqueTags} getSortParams={getSortParams} />
     </div>
   );
 };

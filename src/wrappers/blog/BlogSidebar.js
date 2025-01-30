@@ -143,36 +143,6 @@ const BlogSidebar = () => {
           </ul>
         </div>
       </div>
-      <div className="sidebar-widget mt-50">
-        <h4 className="pro-sidebar-title">Tag </h4>
-        <div className="sidebar-widget-tag mt-25">
-          <ul>
-            <li>
-              <Link to={process.env.PUBLIC_URL + "/blog-standard"}>
-                Clothing
-              </Link>
-            </li>
-            <li>
-              <Link to={process.env.PUBLIC_URL + "/blog-standard"}>
-                Accessories
-              </Link>
-            </li>
-            <li>
-              <Link to={process.env.PUBLIC_URL + "/blog-standard"}>
-                For Men
-              </Link>
-            </li>
-            <li>
-              <Link to={process.env.PUBLIC_URL + "/blog-standard"}>Women</Link>
-            </li>
-            <li>
-              <Link to={process.env.PUBLIC_URL + "/blog-standard"}>
-                Fashion
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
   );
 };

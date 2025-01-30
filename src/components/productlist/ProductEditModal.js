@@ -108,7 +108,6 @@ const ProductEditModal = ({ product, onClose }) => {
     discount: product.discount || 0,
     short_description: product.short_description || '',
     category: product.category || [],
-    tag: product.tag || [],
     affiliateLink: product.affiliate_link || '',
   });
 
@@ -117,7 +116,7 @@ const ProductEditModal = ({ product, onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'category' || name === 'tag') {
+    if (name === 'category') {
       setFormData({ ...formData, [name]: value.split(',').map((item) => item.trim()) });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -142,7 +141,8 @@ const ProductEditModal = ({ product, onClose }) => {
         price: Number(formData.price),
         discount: Number(formData.discount),
         short_description: formData.short_description,
-        affiliate_link: formData.affiliateLink
+        affiliate_link: formData.affiliateLink,
+        category: formData.category.join(','),
       })
       .eq('id', product.id);
 
@@ -357,15 +357,6 @@ const ProductEditModal = ({ product, onClose }) => {
             onChange={handleChange}
           />
 
-          <Label htmlFor="tag">Etiquetas:</Label>
-          <Input
-            id="tag"
-            type="text"
-            name="tag"
-            placeholder="Etiquetas (separadas por comas)"
-            value={Array.isArray(formData.tag) ? formData.tag.join(', ') : formData.tag}
-            onChange={handleChange}
-          />
 
           <Label htmlFor="affiliateLink">Enlace de Afiliado:</Label>
           <Input

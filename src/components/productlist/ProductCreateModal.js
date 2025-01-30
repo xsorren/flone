@@ -78,7 +78,6 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     discount: 0,
     short_description: '',
     category: [], // ingresadas separadas por comas
-    tag: [], // ingresadas separadas por comas
     affiliateLink: ''
   });
 
@@ -86,7 +85,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'category' || name === 'tag') {
+    if (name === 'category') {
       setFormData({
         ...formData,
         [name]: value.split(',').map((item) => item.trim()),
@@ -151,54 +150,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     }
   };
 
-  // ==============================
-  // Lógica para crear tags
-  // ==============================
-  const insertTags = async (productId, tags) => {
-    for (const tagName of tags) {
-      if (tagName === '') continue;
-      let { data: tagData, error: tagError } = await supabase
-        .from('tags')
-        .select('id')
-        .eq('name', tagName)
-        .single();
 
-      if (tagError && tagError.code !== 'PGRST116') {
-        console.error(tagError);
-        toast.error(`Error buscando el tag ${tagName}`);
-        continue;
-      }
-
-      let tagId;
-      if (!tagData) {
-        // Crear el tag
-        const { data: newTagData, error: newTagError } = await supabase
-          .from('tags')
-          .insert({ name: tagName })
-          .select()
-          .single();
-
-        if (newTagError) {
-          console.error(newTagError);
-          toast.error(`Error creando el tag ${tagName}`);
-          continue;
-        }
-        tagId = newTagData.id;
-      } else {
-        tagId = tagData.id;
-      }
-
-      // Insertar relación en product_tags
-      const { error: relError } = await supabase
-        .from('product_tags')
-        .insert({ product_id: productId, tag_id: tagId });
-
-      if (relError) {
-        console.error(relError);
-        toast.error(`Error asignando tag ${tagName} al producto`);
-      }
-    }
-  };
 
   // ==============================
   // Crear el producto + imágenes
@@ -221,6 +173,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
             discount: Number(formData.discount),
             short_description: formData.short_description,
             affiliate_link: formData.affiliateLink,
+            category: formData.category.join(','), // Aplicar mismo cambio si es necesario
           },
         ])
         .select();
@@ -239,10 +192,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
         await insertCategories(productId, formData.category);
       }
 
-      // Insertar tags
-      if (formData.tag && formData.tag.length > 0) {
-        await insertTags(productId, formData.tag);
-      }
+
 
       // Subir imágenes si las hay
       if (images.length > 0) {
@@ -397,19 +347,6 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
             onChange={handleChange}
           />
 
-          <Label htmlFor="tag">Etiquetas:</Label>
-          <Input
-            id="tag"
-            type="text"
-            name="tag"
-            placeholder="Etiquetas (separadas por comas)"
-            value={
-              Array.isArray(formData.tag)
-                ? formData.tag.join(', ')
-                : formData.tag
-            }
-            onChange={handleChange}
-          />
 
           <Label htmlFor="affiliateLink">Enlace de Afiliado:</Label>
           <Input

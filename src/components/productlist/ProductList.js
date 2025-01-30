@@ -234,7 +234,6 @@ const ProductList = () => {
           category: '',
           color: '',
           size: '',
-          tag: '',
           // Podrías agregar created_at y updated_at si quieres
           // o confiar en un trigger o default de la DB.
         };
