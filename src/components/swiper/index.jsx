@@ -24,10 +24,10 @@ const SwiperSlider = forwardRef(
             slidesPerView: 1,
             spaceBetween: 0,
             loop: false,
-            autoplay: options?.autoplay ? {
-                delay: 2500,
+            autoplay: {
+                delay: 5000,
                 disableOnInteraction: false,
-            } : false,
+            },
             watchSlidesProgress: true,
             autoHeight: true,
             breakpoints: {},
@@ -53,22 +53,6 @@ const SwiperSlider = forwardRef(
             >
                 <Swiper {...sliderOptions}>{children}</Swiper>
 
-                {sliderOptions?.navigation && (
-                    <>
-                        <button
-                            type="button"
-                            className={`swiper-button-prev ht-swiper-button-nav ${prevClass}`}
-                        >
-                            <i className={cn(prevIcon, "icon")} />
-                        </button>
-                        <button
-                            type="button"
-                            className={`swiper-button-next ht-swiper-button-nav ${nextClass}`}
-                        >
-                            <i className={cn(nextIcon, "icon")} />
-                        </button>
-                    </>
-                )}
             </div>
         );
     }
