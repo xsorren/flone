@@ -10,7 +10,7 @@ const ModalOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,11 +19,42 @@ const ModalOverlay = styled.div`
 
 const ModalContent = styled.div`
   background-color: #fff;
+  border-radius: 8px;
+  width: 800px;
+  max-width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+`;
+
+const ModalHeader = styled.div`
   padding: 20px;
-  border-radius: 5px;
-  width: 600px;
-  max-height: 80vh;
+  border-bottom: 1px solid #eee;
+  
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+`;
+
+const ModalBody = styled.div`
+  padding: 20px;
   overflow-y: auto;
+  flex: 1;
+`;
+
+const ModalFooter = styled.div`
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  border-radius: 0 0 8px 8px;
 `;
 
 const Form = styled.form`
@@ -31,38 +62,78 @@ const Form = styled.form`
   flex-direction: column;
 `;
 
+const FormGroup = styled.div`
+  margin-bottom: 16px;
+`;
+
 const Label = styled.label`
-  margin-bottom: 5px;
-  font-weight: bold;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
 `;
 
 const Input = styled.input`
-  margin-bottom: 10px;
-  padding: 8px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    outline: none;
+  }
 `;
 
 const Textarea = styled.textarea`
-  margin-bottom: 10px;
-  padding: 8px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  min-height: 100px;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    outline: none;
+  }
 `;
 
 const Button = styled.button`
-  margin-right: 10px;
-  padding: 8px 12px;
+  padding: 10px 16px;
   cursor: pointer;
   border: none;
   border-radius: 5px;
+  font-weight: 500;
   color: #fff;
   background-color: #1890ff;
+  transition: all 0.3s ease;
+  
   &:hover {
     background-color: #40a9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
   }
+  
   &.cancel {
-    background-color: #d9d9d9;
-    color: #000;
+    background-color: #f5f5f5;
+    color: #333;
+    
     &:hover {
-      background-color: #bfbfbf;
+      background-color: #e8e8e8;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+  }
+`;
+
+const FileInput = styled.div`
+  margin-top: 8px;
+  
+  input {
+    padding: 8px 0;
   }
 `;
 
@@ -150,8 +221,6 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     }
   };
 
-
-
   // ==============================
   // Crear el producto + imágenes
   // ==============================
@@ -191,8 +260,6 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
       if (formData.category && formData.category.length > 0) {
         await insertCategories(productId, formData.category);
       }
-
-
 
       // Subir imágenes si las hay
       if (images.length > 0) {
@@ -240,141 +307,155 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
   return (
     <ModalOverlay>
       <ModalContent>
-        <h3>Crear Nuevo Producto</h3>
-        <Form onSubmit={handleSubmit}>
-          <Label htmlFor="code">Código:</Label>
-          <Input
-            id="code"
-            type="text"
-            name="code"
-            placeholder="Código"
-            value={formData.code}
-            onChange={handleChange}
-            required
-          />
-
-          <Label htmlFor="batch">Lote:</Label>
-          <Input
-            id="batch"
-            type="text"
-            name="batch"
-            placeholder="Lote"
-            value={formData.batch}
-            onChange={handleChange}
-          />
-
-          <Label htmlFor="name">Artículo:</Label>
-          <Input
-            id="name"
-            type="text"
-            name="name"
-            placeholder="Artículo"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-
-          <Label htmlFor="stock">Stock:</Label>
-          <Input
-            id="stock"
-            type="number"
-            name="stock"
-            placeholder="Stock"
-            value={formData.stock}
-            onChange={handleChange}
-          />
-
-          <Label htmlFor="purchaseCost">Costo de Compra:</Label>
-          <Input
-            id="purchaseCost"
-            type="number"
-            name="purchaseCost"
-            placeholder="Costo Compra"
-            value={formData.purchaseCost}
-            onChange={handleChange}
-          />
-
-          <Label htmlFor="totalPrice">Precio Total:</Label>
-          <Input
-            id="totalPrice"
-            type="number"
-            name="totalPrice"
-            placeholder="Precio Total"
-            value={formData.totalPrice}
-            onChange={handleChange}
-          />
-
-          <Label htmlFor="price">Precio de Venta:</Label>
-          <Input
-            id="price"
-            type="number"
-            name="price"
-            placeholder="Precio de Venta"
-            value={formData.price}
-            onChange={handleChange}
-          />
-
-          <Label htmlFor="discount">Descuento (%):</Label>
-          <Input
-            id="discount"
-            type="number"
-            name="discount"
-            placeholder="Descuento (%)"
-            value={formData.discount}
-            onChange={handleChange}
-          />
-
-          <Label htmlFor="short_description">Descripción Corta:</Label>
-          <Textarea
-            id="short_description"
-            name="short_description"
-            placeholder="Descripción Corta"
-            value={formData.short_description}
-            onChange={handleChange}
-          ></Textarea>
-
-          <Label htmlFor="category">Categorías:</Label>
-          <Input
-            id="category"
-            type="text"
-            name="category"
-            placeholder="Categorías (separadas por comas)"
-            value={
-              Array.isArray(formData.category)
-                ? formData.category.join(', ')
-                : formData.category
-            }
-            onChange={handleChange}
-          />
-
-
-          <Label htmlFor="affiliateLink">Enlace de Afiliado:</Label>
-          <Input
-            id="affiliateLink"
-            type="text"
-            name="affiliateLink"
-            placeholder="Enlace de Afiliado"
-            value={formData.affiliateLink}
-            onChange={handleChange}
-          />
-
-          <div className="upload-images">
-            <h4>Subir Imágenes:</h4>
-            <Input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImagesChange}
-            />
-          </div>
-
-          <div style={{ marginTop: '10px' }}>
-            <Button type="submit">Crear Producto</Button>
-            <Button type="button" className="cancel" onClick={onClose}>
-              Cancelar
-            </Button>
-          </div>
-        </Form>
+        <ModalHeader>
+          <h3>Crear Nuevo Producto</h3>
+        </ModalHeader>
+        
+        <ModalBody>
+          <Form onSubmit={handleSubmit}>
+            <FormGroup>
+              <Label htmlFor="code">Código</Label>
+              <Input
+                type="text"
+                id="code"
+                name="code"
+                value={formData.code}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            
+            <FormGroup>
+              <Label htmlFor="batch">Lote</Label>
+              <Input
+                type="text"
+                id="batch"
+                name="batch"
+                value={formData.batch}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            
+            <FormGroup>
+              <Label htmlFor="name">Nombre del Artículo</Label>
+              <Input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </FormGroup>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <FormGroup>
+                <Label htmlFor="stock">Stock</Label>
+                <Input
+                  type="number"
+                  id="stock"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              
+              <FormGroup>
+                <Label htmlFor="discount">Descuento (%)</Label>
+                <Input
+                  type="number"
+                  id="discount"
+                  name="discount"
+                  value={formData.discount}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+              <FormGroup>
+                <Label htmlFor="purchaseCost">Costo de Compra</Label>
+                <Input
+                  type="number"
+                  id="purchaseCost"
+                  name="purchaseCost"
+                  value={formData.purchaseCost}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              
+              <FormGroup>
+                <Label htmlFor="totalPrice">Precio Total</Label>
+                <Input
+                  type="number"
+                  id="totalPrice"
+                  name="totalPrice"
+                  value={formData.totalPrice}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              
+              <FormGroup>
+                <Label htmlFor="price">Precio de Venta</Label>
+                <Input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+            </div>
+            
+            <FormGroup>
+              <Label htmlFor="category">Categorías (separadas por coma)</Label>
+              <Input
+                type="text"
+                id="category"
+                name="category"
+                value={formData.category.join(', ')}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            
+            <FormGroup>
+              <Label htmlFor="short_description">Descripción Corta</Label>
+              <Textarea
+                id="short_description"
+                name="short_description"
+                value={formData.short_description}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            
+            <FormGroup>
+              <Label htmlFor="affiliateLink">Enlace de Afiliado</Label>
+              <Input
+                type="url"
+                id="affiliateLink"
+                name="affiliateLink"
+                value={formData.affiliateLink}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            
+            <FormGroup>
+              <Label htmlFor="images">Imágenes del Producto</Label>
+              <FileInput>
+                <Input
+                  type="file"
+                  id="images"
+                  multiple
+                  onChange={handleImagesChange}
+                />
+              </FileInput>
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        
+        <ModalFooter>
+          <Button className="cancel" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleSubmit}>Guardar Producto</Button>
+        </ModalFooter>
       </ModalContent>
     </ModalOverlay>
   );

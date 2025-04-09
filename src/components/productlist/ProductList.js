@@ -10,135 +10,348 @@ import { supabase } from '../../utils/supabaseClient';
 // Para procesar archivos Excel
 import * as XLSX from 'xlsx';
 
+// Definición de iconos SVG
+const Icons = {
+  Plus: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+    </svg>
+  ),
+  CheckSquare: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+      <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
+    </svg>
+  ),
+  Times: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+    </svg>
+  ),
+  TrashAlt: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+      <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+    </svg>
+  ),
+  FileUpload: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+      <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+    </svg>
+  ),
+  Eye: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+      <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+    </svg>
+  ),
+  Edit: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+    </svg>
+  ),
+  ChevronLeft: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path fillRule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+    </svg>
+  ),
+  ChevronRight: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+    </svg>
+  )
+};
+
 // Styled Components
 const Container = styled.div`
-  padding: 20px;
-  max-width: 1200px;
+  padding: 30px;
+  max-width: 1300px;
   margin: 0 auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 `;
 
-const Header = styled.div`
+const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eaedf0;
 `;
 
 const Title = styled.h2`
   margin: 0;
-  color: #333;
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 600;
 `;
 
 const LogoutButton = styled.button`
-  background-color: #ff4d4f;
+  background-color: #f44336;
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
+  padding: 10px 16px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
 
   &:hover {
-    background-color: #ff7875;
+    background-color: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
   }
 `;
 
 const ActionsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 25px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 `;
 
 const ActionButton = styled.button`
-  padding: 8px 12px;
+  padding: 10px 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  background-color: #1890ff;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  background-color: #1976d2;
   color: white;
-  transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #40a9ff;
+    background-color: #1565c0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
   }
 
   &.delete-selected {
-    background-color: #ff4d4f;
+    background-color: #f44336;
 
     &:hover {
-      background-color: #ff7875;
+      background-color: #d32f2f;
+      box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
     }
   }
 
   &.cancel-selection {
-    background-color: #d9d9d9;
-    color: #000;
-
+    background-color: #78909c;
+    
     &:hover {
-      background-color: #bfbfbf;
+      background-color: #607d8b;
+      box-shadow: 0 4px 8px rgba(120, 144, 156, 0.3);
     }
   }
+`;
+
+const FileInputContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  input[type="file"] {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #fff;
+  }
+`;
+
+const TableContainer = styled.div`
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 `;
 
 const Th = styled.th`
-  padding: 12px 15px;
+  padding: 15px;
   text-align: left;
-  background-color: #f5f5f5;
-  color: #555;
+  background-color: #f5f7fa;
+  color: #2c3e50;
+  font-weight: 600;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 2px solid #e0e6ed;
 `;
 
 const Td = styled.td`
-  padding: 12px 15px;
-  color: #555;
+  padding: 15px;
+  color: #3c4858;
+  border-bottom: 1px solid #eaedf0;
+  vertical-align: middle;
 `;
 
 const Tr = styled.tr`
-  &:nth-child(even) {
-    background-color: #fafafa;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #f5f9ff;
+  }
+
+  &.selected {
+    background-color: #e3f2fd;
   }
 `;
 
-const ActionsCell = styled.td`
-  display: flex;
-  gap: 5px;
+const Checkbox = styled.input`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 `;
 
-const Button = styled.button`
-  padding: 5px 10px;
+const ActionsCell = styled.td`
+  padding: 12px 15px;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+`;
+
+const ActionIconButton = styled.button`
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  border-radius: 3px;
+  border-radius: 6px;
   cursor: pointer;
   color: white;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
 
   &.edit {
-    background-color: #52c41a;
+    background-color: #4caf50;
     &:hover {
-      background-color: #73d13d;
+      background-color: #388e3c;
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(76, 175, 80, 0.3);
     }
   }
 
   &.delete {
-    background-color: #ff4d4f;
+    background-color: #f44336;
     &:hover {
-      background-color: #ff7875;
+      background-color: #d32f2f;
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(244, 67, 54, 0.3);
     }
   }
 
   &.view {
-    background-color: #1890ff;
+    background-color: #2196f3;
     &:hover {
-      background-color: #40a9ff;
+      background-color: #1976d2;
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(33, 150, 243, 0.3);
     }
   }
+`;
+
+const EmptyState = styled.div`
+  padding: 30px;
+  text-align: center;
+  color: #78909c;
+  
+  h3 {
+    margin-bottom: 15px;
+    color: #546e7a;
+  }
+`;
+
+const SearchInput = styled.input`
+  padding: 10px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  width: 300px;
+  margin-left: auto;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+  }
+`;
+
+const StatusBadge = styled.span`
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  
+  &.instock {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  &.lowstock {
+    background-color: #fff8e1;
+    color: #f57f17;
+  }
+  
+  &.outofstock {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+`;
+
+const Pagination = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+`;
+
+const PaginationButton = styled.button`
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #f5f7fa;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const PaginationInfo = styled.div`
+  color: #546e7a;
+  font-weight: 500;
 `;
 
 const ProductList = () => {
@@ -150,6 +363,9 @@ const ProductList = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingProduct, setViewingProduct] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(10);
   const navigate = useNavigate();
 
   // Para manejar el archivo Excel
@@ -285,21 +501,33 @@ const ProductList = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedProducts.length === 0) return;
+    
+    if (window.confirm(`¿Estás seguro de eliminar ${selectedProducts.length} productos?`)) {
+      try {
+        // Eliminar imágenes asociadas
+        await deleteImagesForProducts(selectedProducts);
+        
+        // Eliminar productos
+        const { error } = await supabase
+          .from('products')
+          .delete()
+          .in('id', selectedProducts);
 
-    // Antes de borrar de la tabla products, borremos las imágenes asociadas
-    await deleteImagesForProducts(selectedProducts);
+        if (error) {
+          console.error('Error deleting products:', error);
+          alert('Error al eliminar productos');
+          return;
+        }
 
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .in('id', selectedProducts);
-
-    if (!error) {
-      fetchProducts();
-      setSelectedProducts([]);
-      setMultiSelect(false);
-    } else {
-      console.error(error);
+        // Actualizar lista
+        setProducts(products.filter((product) => !selectedProducts.includes(product.id)));
+        setSelectedProducts([]);
+        setMultiSelect(false);
+        alert('Productos eliminados correctamente');
+      } catch (error) {
+        console.error('Error in delete process:', error);
+        alert('Error en el proceso de eliminación');
+      }
     }
   };
 
@@ -307,18 +535,24 @@ const ProductList = () => {
   // Manejo de borrado individual
   // ==============================
   const handleDeleteProduct = async (id) => {
-    // Borrar imágenes asociadas primero
-    await deleteImagesForProducts([id]);
-
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error(error);
-    } else {
-      fetchProducts();
+    if (window.confirm('¿Estás seguro de eliminar este producto?')) {
+      try {
+        // Eliminar imágenes asociadas
+        await deleteImagesForProducts([id]);
+        
+        const { error } = await supabase.from('products').delete().eq('id', id);
+        if (error) {
+          console.error(error);
+          alert('Error al eliminar el producto');
+          return;
+        }
+        
+        setProducts(products.filter((product) => product.id !== id));
+        alert('Producto eliminado correctamente');
+      } catch (error) {
+        console.error('Error in delete process:', error);
+        alert('Error en el proceso de eliminación');
+      }
     }
   };
 
@@ -385,132 +619,197 @@ const ProductList = () => {
     navigate('/login');
   };
 
+  // Pagination
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  
+  // Filter products based on search term
+  const filteredProducts = products.filter(product => 
+    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.batch?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  const getStockStatus = (stock) => {
+    if (stock <= 0) return { class: 'outofstock', text: 'Sin Stock' };
+    if (stock < 5) return { class: 'lowstock', text: 'Stock Bajo' };
+    return { class: 'instock', text: 'Disponible' };
+  };
+
   return (
     <Container>
-      <Header>
-        <Title>Listado de Productos</Title>
+      <PageHeader>
+        <Title>Administración de Productos</Title>
         <LogoutButton onClick={handleLogout}>Cerrar Sesión</LogoutButton>
-      </Header>
+      </PageHeader>
 
       <ActionsContainer>
-        {multiSelect ? (
-          <>
-            <ActionButton
-              className="delete-selected"
-              onClick={handleDeleteSelected}
-            >
-              Eliminar Seleccionados
-            </ActionButton>
-            <ActionButton
-              className="cancel-selection"
-              onClick={() => {
-                setMultiSelect(false);
-                setSelectedProducts([]);
-              }}
-            >
-              Cancelar Selección
-            </ActionButton>
-          </>
+        <ActionButton onClick={handleCreateProduct}>
+          <Icons.Plus /> Crear Producto
+        </ActionButton>
+
+        {!multiSelect ? (
+          <ActionButton onClick={() => setMultiSelect(true)}>
+            <Icons.CheckSquare /> Selección Múltiple
+          </ActionButton>
         ) : (
           <>
-            <ActionButton onClick={() => setMultiSelect(true)}>
-              Seleccionar Múltiples
+            <ActionButton className="cancel-selection" onClick={() => {
+              setMultiSelect(false);
+              setSelectedProducts([]);
+            }}>
+              <Icons.Times /> Cancelar Selección
             </ActionButton>
-            <ActionButton onClick={handleCreateProduct}>
-              Crear Nuevo Producto
+            <ActionButton 
+              className="delete-selected" 
+              onClick={handleDeleteSelected}
+              disabled={selectedProducts.length === 0}
+            >
+              <Icons.TrashAlt /> Eliminar Seleccionados ({selectedProducts.length})
             </ActionButton>
           </>
         )}
 
-        {/* Botón para subir archivo Excel */}
-        <ActionButton>
-          <label htmlFor="excelFile" style={{ cursor: 'pointer' }}>
-            Subir Excel
-          </label>
-        </ActionButton>
-        <input
-          id="excelFile"
-          type="file"
-          accept=".xlsx, .xls"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
+        <FileInputContainer>
+          <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
+          <ActionButton onClick={handleUploadExcel} disabled={!excelFile}>
+            <Icons.FileUpload /> Importar Excel
+          </ActionButton>
+        </FileInputContainer>
+
+        <SearchInput 
+          type="text" 
+          placeholder="Buscar productos..." 
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
         />
-        <ActionButton onClick={handleUploadExcel}>
-          Procesar Excel
-        </ActionButton>
       </ActionsContainer>
 
-      <Table>
-        <thead>
-          <Tr>
-            {multiSelect && <Th>Seleccionar</Th>}
-            <Th>Código</Th>
-            <Th>Artículo</Th>
-            <Th>Stock</Th>
-            <Th>Acciones</Th>
-          </Tr>
-        </thead>
-        <tbody>
-          {products && products.length > 0 ? (
-            products.map((product) => (
-              <Tr key={product.id}>
-                {multiSelect && (
-                  <Td>
-                    <input
-                      type="checkbox"
-                      checked={selectedProducts.includes(product.id)}
-                      onChange={() => handleSelectProduct(product.id)}
-                    />
-                  </Td>
-                )}
-                <Td>{product.code || 'Sin código'}</Td>
-                <Td>{product.name}</Td>
-                <Td>{product.stock || 0}</Td>
-                <ActionsCell>
-                  {!multiSelect && (
-                    <>
-                      <Button
-                        className="edit"
-                        onClick={() => handleEditProduct(product)}
-                      >
-                        Editar
-                      </Button>
-                      <Button
-                        className="delete"
-                        onClick={() => handleDeleteProduct(product.id)}
-                      >
-                        Eliminar
-                      </Button>
-                      <Button
+      <TableContainer>
+        <Table>
+          <thead>
+            <tr>
+              {multiSelect && <Th width="40px"></Th>}
+              <Th>Código</Th>
+              <Th>Lote</Th>
+              <Th>Artículo</Th>
+              <Th>Stock</Th>
+              <Th>Estado</Th>
+              <Th>Costo</Th>
+              <Th>Precio</Th>
+              <Th>Descuento</Th>
+              <Th>Categoría</Th>
+              <Th width="120px">Acciones</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentProducts.length > 0 ? (
+              currentProducts.map((product) => {
+                const stockStatus = getStockStatus(product.stock);
+                return (
+                  <Tr 
+                    key={product.id}
+                    className={selectedProducts.includes(product.id) ? 'selected' : ''}
+                  >
+                    {multiSelect && (
+                      <Td>
+                        <Checkbox
+                          type="checkbox"
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={() => handleSelectProduct(product.id)}
+                        />
+                      </Td>
+                    )}
+                    <Td>{product.code}</Td>
+                    <Td>{product.batch}</Td>
+                    <Td>{product.name}</Td>
+                    <Td>{product.stock}</Td>
+                    <Td>
+                      <StatusBadge className={stockStatus.class}>
+                        {stockStatus.text}
+                      </StatusBadge>
+                    </Td>
+                    <Td>${product.purchase_cost?.toLocaleString()}</Td>
+                    <Td>${product.price?.toLocaleString()}</Td>
+                    <Td>{product.discount}%</Td>
+                    <Td>{product.category}</Td>
+                    <ActionsCell>
+                      <ActionIconButton
                         className="view"
                         onClick={() => handleViewProduct(product)}
+                        title="Ver detalles"
                       >
-                        Ver
-                      </Button>
-                    </>
-                  )}
-                </ActionsCell>
-              </Tr>
-            ))
-          ) : (
-            <Tr>
-              <Td
-                colSpan={multiSelect ? 5 : 4}
-                style={{ textAlign: 'center', padding: '20px' }}
-              >
-                No hay productos disponibles.
-              </Td>
-            </Tr>
-          )}
-        </tbody>
-      </Table>
+                        <Icons.Eye />
+                      </ActionIconButton>
+                      <ActionIconButton
+                        className="edit"
+                        onClick={() => handleEditProduct(product)}
+                        title="Editar producto"
+                      >
+                        <Icons.Edit />
+                      </ActionIconButton>
+                      <ActionIconButton
+                        className="delete"
+                        onClick={() => handleDeleteProduct(product.id)}
+                        title="Eliminar producto"
+                      >
+                        <Icons.TrashAlt />
+                      </ActionIconButton>
+                    </ActionsCell>
+                  </Tr>
+                );
+              })
+            ) : (
+              <tr>
+                <Td colSpan={multiSelect ? 11 : 10} style={{ textAlign: 'center' }}>
+                  <EmptyState>
+                    <h3>No hay productos para mostrar</h3>
+                    <p>{searchTerm ? 'Intenta con otra búsqueda' : 'Agrega nuevos productos haciendo clic en "Crear Producto"'}</p>
+                  </EmptyState>
+                </Td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      </TableContainer>
+
+      {filteredProducts.length > productsPerPage && (
+        <Pagination>
+          <PaginationButton 
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            <Icons.ChevronLeft /> Anterior
+          </PaginationButton>
+          
+          <PaginationInfo>
+            Página {currentPage} de {totalPages}
+          </PaginationInfo>
+          
+          <PaginationButton 
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Siguiente <Icons.ChevronRight />
+          </PaginationButton>
+        </Pagination>
+      )}
+
+      {showCreateModal && (
+        <ProductCreateModal onClose={handleCloseCreateModal} refreshProducts={fetchProducts} />
+      )}
 
       {showEditModal && (
         <ProductEditModal
           product={editingProduct}
           onClose={() => {
             setShowEditModal(false);
-            setEditingProduct(null);
             fetchProducts();
           }}
         />
@@ -519,17 +818,7 @@ const ProductList = () => {
       {showViewModal && (
         <ProductViewModal
           product={viewingProduct}
-          onClose={() => {
-            setShowViewModal(false);
-            setViewingProduct(null);
-          }}
-        />
-      )}
-
-      {showCreateModal && (
-        <ProductCreateModal
-          onClose={handleCloseCreateModal}
-          refreshProducts={fetchProducts}
+          onClose={() => setShowViewModal(false)}
         />
       )}
     </Container>
