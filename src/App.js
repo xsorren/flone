@@ -2,6 +2,7 @@
 import React, { Suspense, lazy } from "react";
 import ScrollToTop from "./helpers/scroll-top";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 // Importar los componentes nuevos
 import PrivateRoute from "./components/PrivateRoute";
@@ -145,6 +146,7 @@ const App = () => {
             {/* Ruta por defecto para páginas no encontradas */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <WhatsAppButton />
         </Suspense>
       </ScrollToTop>
     </Router>
