@@ -51,11 +51,6 @@ const Contact = () => {
                     <h3>Síguenos</h3>
                     <ul>
                       <li>
-                        <a href="//facebook.com">
-                          <i className="fa fa-facebook" style={{fontSize:"20px"}}/>
-                        </a>
-                      </li>
-                      <li>
                         <a href="//instagram.com">
                           <i className="fa fa-instagram" style={{fontSize:"20px"}}/>
                         </a>

@@ -437,11 +437,6 @@ function ProductModal({ product, show, onHide, wishlistItem, currency }) {
               <div className="pro-details-social">
                 <ul>
                   <li>
-                    <a href="//facebook.com">
-                      <i className="fa fa-facebook" />
-                    </a>
-                  </li>
-                  <li>
                     <a href="//dribbble.com">
                       <i className="fa fa-instagram" />
                     </a>
