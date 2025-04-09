@@ -465,7 +465,8 @@ const ProductList = () => {
       // Insertar todo en la tabla "products"
       const { data: newProducts, error } = await supabase
         .from('products')
-        .insert(mappedData);
+        .insert(mappedData)
+        .select();
   
       if (error) {
         console.error('Error subiendo productos desde Excel:', error);
