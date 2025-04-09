@@ -440,14 +440,21 @@ const ProductList = () => {
   
           // Precio total (numérico)
           total_price: parseNumeric(row['Precio Total']),
+          
+          // Nuevos campos agregados:
+          // Precio de venta (numérico)
+          price: parseNumeric(row['Precio Venta']),
+          
+          // Categoría (texto)
+          category: row['Categoria']?.toString() ?? '',
+          
+          // Descripción corta (texto)
+          short_description: row['Descripcion']?.toString() ?? '',
   
-          // Campos extra que no estén en el Excel, si quieres inicializarlos:
-          price: 0,
+          // Campos extra que no estén en el Excel, se mantienen con valores por defecto
           discount: 0,
           rating: 0,
-          short_description: '',
           affiliate_link: '',
-          category: '',
           color: '',
           size: '',
           // Podrías agregar created_at y updated_at si quieres
