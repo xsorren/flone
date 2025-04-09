@@ -153,17 +153,17 @@ const ProductViewModal = ({ product, onClose }) => {
           
           <FieldGroup>
             <FieldLabel>Costo Compra:</FieldLabel>
-            <FieldValue>${product.purchase_cost?.toLocaleString()}</FieldValue>
+            <FieldValue>${product.purchase_cost?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</FieldValue>
           </FieldGroup>
           
           <FieldGroup>
             <FieldLabel>Precio Total:</FieldLabel>
-            <FieldValue>${product.total_price?.toLocaleString()}</FieldValue>
+            <FieldValue>${product.total_price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</FieldValue>
           </FieldGroup>
           
           <FieldGroup>
             <FieldLabel>Precio de Venta:</FieldLabel>
-            <FieldValue>${product.price?.toLocaleString()}</FieldValue>
+            <FieldValue>${product.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</FieldValue>
           </FieldGroup>
           
           <FieldGroup>

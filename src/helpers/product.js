@@ -66,12 +66,6 @@ export const getSortedProducts = (products, sortType, sortValue) => {
         return catArr.includes(sortValue);
       });
 
-    case "tag":
-      return products.filter(product => {
-        const tagArr = stringToArray(product.tag);
-        return tagArr.includes(sortValue);
-      });
-
     case "color":
       return products.filter(product => {
         const colorArr = stringToArray(product.color);
@@ -118,31 +112,17 @@ export const getIndividualCategories = (products) => {
   let allCategories = [];
 
   products.forEach((product) => {
-    // category es un string y lo convertimos en array
-    const categoriesArray = stringToArray(product.category);
-    allCategories = allCategories.concat(categoriesArray);
+    if (product.category) {  // Verificar que product.category exista
+      // category es un string y lo convertimos en array
+      const categoriesArray = stringToArray(product.category);
+      allCategories = allCategories.concat(categoriesArray);
+    }
   });
 
-  // Quitamos duplicados
-  return [...new Set(allCategories)];
+  // Quitamos duplicados y filtramos valores vacíos
+  return [...new Set(allCategories)].filter(item => item && item.trim() !== '');
 };
 
-
-
-// get individual tags
-export const getIndividualTags = (products) => {
-  if (!Array.isArray(products)) return [];
-  let allTags = [];
-
-  products.forEach((product) => {
-    // product.tag es un string
-    const tagsArray = stringToArray(product.tag);
-    allTags = allTags.concat(tagsArray);
-  });
-
-  // Quitamos duplicados
-  return [...new Set(allTags)];
-};
 
 
 // get individual colors
@@ -151,13 +131,15 @@ export const getIndividualColors = (products) => {
   let allColors = [];
 
   products.forEach((product) => {
-    // product.color es un string
-    const colorsArray = stringToArray(product.color);
-    allColors = allColors.concat(colorsArray);
+    if (product.color) {  // Verificar que product.color exista
+      // product.color es un string
+      const colorsArray = stringToArray(product.color);
+      allColors = allColors.concat(colorsArray);
+    }
   });
 
-  // Quitamos duplicados
-  return [...new Set(allColors)];
+  // Quitamos duplicados y filtramos valores vacíos
+  return [...new Set(allColors)].filter(item => item && item.trim() !== '');
 };
 
 
@@ -167,13 +149,15 @@ export const getProductsIndividualSizes = (products) => {
   let allSizes = [];
 
   products.forEach((product) => {
-    // product.size es un string
-    const sizesArray = stringToArray(product.size);
-    allSizes = allSizes.concat(sizesArray);
+    if (product.size) {  // Verificar que product.size exista
+      // product.size es un string
+      const sizesArray = stringToArray(product.size);
+      allSizes = allSizes.concat(sizesArray);
+    }
   });
 
-  // Quitamos duplicados
-  return [...new Set(allSizes)];
+  // Quitamos duplicados y filtramos valores vacíos
+  return [...new Set(allSizes)].filter(item => item && item.trim() !== '');
 };
 
 

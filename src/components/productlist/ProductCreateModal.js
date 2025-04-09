@@ -143,9 +143,9 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
     batch: '',
     name: '',
     stock: 0,
-    purchaseCost: 0,
-    totalPrice: 0,
-    price: 0,
+    purchaseCost: 0.0,
+    totalPrice: 0.0,
+    price: 0.0,
     discount: 0,
     short_description: '',
     category: [], // ingresadas separadas por comas
@@ -161,6 +161,9 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
         ...formData,
         [name]: value.split(',').map((item) => item.trim()),
       });
+    } else if (['purchaseCost', 'totalPrice', 'price'].includes(name)) {
+      // Asegurar que los valores monetarios se manejen como float
+      setFormData({ ...formData, [name]: parseFloat(value) || 0.0 });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -236,13 +239,13 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
             batch: formData.batch,
             name: formData.name,
             stock: Number(formData.stock),
-            purchase_cost: Number(formData.purchaseCost),
-            total_price: Number(formData.totalPrice),
-            price: Number(formData.price),
+            purchase_cost: parseFloat(formData.purchaseCost) || 0.0,
+            total_price: parseFloat(formData.totalPrice) || 0.0,
+            price: parseFloat(formData.price) || 0.0,
             discount: Number(formData.discount),
             short_description: formData.short_description,
             affiliate_link: formData.affiliateLink,
-            category: formData.category.join(','), // Aplicar mismo cambio si es necesario
+            category: formData.category.join(','),
           },
         ])
         .select();
@@ -378,6 +381,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
                   type="number"
                   id="purchaseCost"
                   name="purchaseCost"
+                  step="0.01"
                   value={formData.purchaseCost}
                   onChange={handleChange}
                 />
@@ -389,6 +393,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
                   type="number"
                   id="totalPrice"
                   name="totalPrice"
+                  step="0.01"
                   value={formData.totalPrice}
                   onChange={handleChange}
                 />
@@ -400,6 +405,7 @@ const ProductCreateModal = ({ onClose, refreshProducts }) => {
                   type="number"
                   id="price"
                   name="price"
+                  step="0.01"
                   value={formData.price}
                   onChange={handleChange}
                 />

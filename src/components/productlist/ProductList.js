@@ -421,7 +421,7 @@ const ProductList = () => {
       }
 
       // Actualizar el estado
-      setTotalCount(countResponse.count || 0); // Para select con count: 'exact'
+      setTotalCount(countResponse.count || 0);
       setProducts(dataResponse.data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -451,17 +451,40 @@ const ProductList = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       // Convertir a JSON (cada fila del Excel será un objeto)
       const excelData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Log para diagnóstico
+      console.log("Primera fila del Excel:", excelData[0]);
   
       // Mapeo de datos Excel a estructura de tabla
       const mappedData = excelData.map((row) => {
         const parseNumeric = (val) => {
-          if (!val) return 0;
-          // Quitar puntos de miles y reemplazar la coma decimal por punto
-          const normalized = val.toString().replace(/\./g, '').replace(',', '.');
-          return parseFloat(normalized) || 0;
+          if (!val && val !== 0) return 0.0;
+          
+          // Convertir a string si es un número
+          const strVal = val.toString().trim();
+          
+          // Detectar el formato del número
+          // Si tiene una coma pero no tiene punto, asumimos que la coma es el separador decimal
+          if (strVal.includes(',') && !strVal.includes('.')) {
+            return parseFloat(strVal.replace(',', '.')) || 0.0;
+          }
+          
+          // Si tiene punto pero no tiene coma, es el formato estándar (parseFloat lo maneja correctamente)
+          if (strVal.includes('.') && !strVal.includes(',')) {
+            return parseFloat(strVal) || 0.0;
+          }
+          
+          // Si tiene ambos (punto y coma), asumimos que el punto es separador de miles y la coma es separador decimal
+          if (strVal.includes('.') && strVal.includes(',')) {
+            return parseFloat(strVal.replace(/\./g, '').replace(',', '.')) || 0.0;
+          }
+          
+          // Para cualquier otro caso, intentamos parseFloat directamente
+          return parseFloat(strVal) || 0.0;
         };
   
-        return {
+        // Crear el objeto mapeado
+        const mappedRow = {
           code: row['Codigo']?.toString() ?? '',
           batch: row['Lote']?.toString() ?? '',
           name: row['Articulo'] ?? '',
@@ -477,7 +500,26 @@ const ProductList = () => {
           color: '',
           size: '',
         };
+        
+        // Log para diagnóstico de valores monetarios
+        if (row['Costo Compra'] || row['Precio Total'] || row['Precio Venta']) {
+          console.log('Valores monetarios originales:', {
+            costoCompra: row['Costo Compra'],
+            precioTotal: row['Precio Total'],
+            precioVenta: row['Precio Venta']
+          });
+          console.log('Valores monetarios parseados:', {
+            purchaseCost: mappedRow.purchase_cost,
+            totalPrice: mappedRow.total_price,
+            price: mappedRow.price
+          });
+        }
+        
+        return mappedRow;
       });
+      
+      // Log para diagnóstico
+      console.log("Datos mapeados (primeros 2):", mappedData.slice(0, 2));
   
       // Insertar en la tabla "products"
       const { data: newProducts, error } = await supabase
@@ -487,7 +529,13 @@ const ProductList = () => {
   
       if (error) {
         console.error('Error subiendo productos desde Excel:', error);
-        alert('Error subiendo productos desde Excel: ' + error.message);
+        
+        // Detallar mejor el error si es un problema de tipo de datos
+        if (error.message && error.message.includes('violates type')) {
+          alert('Error: Hay valores numéricos en formato incorrecto en el Excel. Asegúrate de que los precios y costos estén en formato numérico. Error detallado: ' + error.message);
+        } else {
+          alert('Error subiendo productos desde Excel: ' + error.message);
+        }
         return;
       }
       
@@ -825,8 +873,8 @@ const ProductList = () => {
                         {stockStatus.text}
                       </StatusBadge>
                     </Td>
-                    <Td>${product.purchase_cost?.toLocaleString()}</Td>
-                    <Td>${product.price?.toLocaleString()}</Td>
+                    <Td>${product.purchase_cost?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Td>
+                    <Td>${product.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Td>
                     <Td>{product.discount}%</Td>
                     <Td>{product.category}</Td>
                     <ActionsCell>

@@ -2,7 +2,6 @@ import PropTypes from "prop-types";
 import clsx from "clsx";
 import {
   getIndividualCategories,
-  getIndividualTags,
   getIndividualColors,
   getProductsIndividualSizes
 } from "../../helpers/product";
@@ -15,7 +14,6 @@ const ShopSidebar = ({ products, getSortParams, sideSpaceClass }) => {
   const uniqueCategories = getIndividualCategories(products);
   const uniqueColors = getIndividualColors(products);
   const uniqueSizes = getProductsIndividualSizes(products);
-  const uniqueTags = getIndividualTags(products);
 
   return (
     <div className={clsx("sidebar-style", sideSpaceClass)}>
