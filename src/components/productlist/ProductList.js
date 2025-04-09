@@ -366,6 +366,8 @@ const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Para manejar el archivo Excel
@@ -373,22 +375,59 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [currentPage, searchTerm]); // Refetch cuando cambia la página o el término de búsqueda
 
-  // 1. Traer productos con sus imágenes (left join).
+  // 1. Traer productos con sus imágenes (left join) con paginación y búsqueda en servidor
   const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        id, code, batch, name, stock, category, purchase_cost, total_price, price, discount, rating, short_description, affiliate_link, created_at, updated_at,
-        images (id, url)
-      `);
+    setLoading(true);
+    try {
+      // Primero obtenemos el total para la paginación
+      let countQuery = supabase
+        .from('products')
+        .select('id', { count: 'exact' }); // Usar select con count: 'exact' en lugar de count()
+        
+      // Consulta principal con productos e imágenes
+      let query = supabase
+        .from('products')
+        .select(`
+          id, code, batch, name, stock, category, purchase_cost, total_price, price, discount, rating, 
+          short_description, affiliate_link, created_at, updated_at,
+          images (id, url)
+        `)
+        .range((currentPage - 1) * productsPerPage, (currentPage * productsPerPage) - 1);
 
-    if (error) {
-      console.error('Error fetching products with images:', error);
-    } else {
-      console.log('Fetched products with images:', data);
-      setProducts(data || []);
+      // Si hay un término de búsqueda, aplicamos filtros
+      if (searchTerm) {
+        const filter = `name.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%,batch.ilike.%${searchTerm}%`;
+        query = query.or(filter);
+        countQuery = countQuery.or(filter);
+      }
+
+      // Ejecutar ambas consultas en paralelo
+      const [countResponse, dataResponse] = await Promise.all([
+        countQuery,
+        query
+      ]);
+
+      // Verificar errores en ambas respuestas
+      if (countResponse.error) {
+        console.error('Error al obtener conteo:', countResponse.error);
+        throw countResponse.error;
+      }
+
+      if (dataResponse.error) {
+        console.error('Error al obtener productos:', dataResponse.error);
+        throw dataResponse.error;
+      }
+
+      // Actualizar el estado
+      setTotalCount(countResponse.count || 0); // Para select con count: 'exact'
+      setProducts(dataResponse.data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      alert('Error al cargar los productos');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -402,6 +441,7 @@ const ProductList = () => {
   const handleUploadExcel = async () => {
     if (!excelFile) return;
   
+    setLoading(true);
     try {
       // Leer el archivo como ArrayBuffer
       const data = await excelFile.arrayBuffer();
@@ -412,17 +452,11 @@ const ProductList = () => {
       // Convertir a JSON (cada fila del Excel será un objeto)
       const excelData = XLSX.utils.sheet_to_json(worksheet);
   
-      // Ahora mapeamos cada fila de Excel a la estructura de tu tabla "products"
-      // Ajusta los nombres de columna según tu Excel exacto
+      // Mapeo de datos Excel a estructura de tabla
       const mappedData = excelData.map((row) => {
-        // Si en Excel tienes un formato de precios con comas, puedes convertirlos a float.
-        // Por ejemplo, si "row['Precio Total']" viene como "10.160,00", necesitarás
-        // reemplazar el separador de miles/punto y convertir la coma decimal. 
-        // Ejemplo rápido de parseo (ajústalo según necesites):
         const parseNumeric = (val) => {
           if (!val) return 0;
           // Quitar puntos de miles y reemplazar la coma decimal por punto
-          // "10.160,00" -> "10160.00"
           const normalized = val.toString().replace(/\./g, '').replace(',', '.');
           return parseFloat(normalized) || 0;
         };
@@ -431,38 +465,21 @@ const ProductList = () => {
           code: row['Codigo']?.toString() ?? '',
           batch: row['Lote']?.toString() ?? '',
           name: row['Articulo'] ?? '',
-  
-          // Stock como entero
           stock: parseInt(row['Stock']) || 0,
-  
-          // Costo de compra (numérico)
           purchase_cost: parseNumeric(row['Costo Compra']),
-  
-          // Precio total (numérico)
           total_price: parseNumeric(row['Precio Total']),
-          
-          // Nuevos campos agregados:
-          // Precio de venta (numérico)
           price: parseNumeric(row['Precio Venta']),
-          
-          // Categoría (texto)
           category: row['Categoria']?.toString() ?? '',
-          
-          // Descripción corta (texto)
           short_description: row['Descripcion']?.toString() ?? '',
-  
-          // Campos extra que no estén en el Excel, se mantienen con valores por defecto
           discount: 0,
           rating: 0,
           affiliate_link: '',
           color: '',
           size: '',
-          // Podrías agregar created_at y updated_at si quieres
-          // o confiar en un trigger o default de la DB.
         };
       });
   
-      // Insertar todo en la tabla "products"
+      // Insertar en la tabla "products"
       const { data: newProducts, error } = await supabase
         .from('products')
         .insert(mappedData)
@@ -470,19 +487,50 @@ const ProductList = () => {
   
       if (error) {
         console.error('Error subiendo productos desde Excel:', error);
-        alert('Error subiendo productos desde Excel. Revisa la consola.');
-      } else {
-        console.log('Productos subidos:', newProducts);
-        alert('Productos subidos correctamente');
-        // Volvemos a recargar la lista de productos
-        fetchProducts();
+        alert('Error subiendo productos desde Excel: ' + error.message);
+        return;
       }
+      
+      console.log('Productos subidos:', newProducts);
+      alert(`${newProducts.length} productos subidos correctamente`);
+      
+      // Reset el input de archivo
+      setExcelFile(null);
+      document.getElementById('excel-upload').value = '';
+      
+      // Volver a la primera página y recargar los productos
+      setCurrentPage(1);
+      await fetchProducts();
+      
     } catch (err) {
       console.error('Error al procesar el Excel:', err);
-      alert('Error al procesar el archivo Excel. Revisa la consola.');
+      alert('Error al procesar el archivo Excel: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
   
+  // ==============================
+  // Manejo de búsqueda
+  // ==============================
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset a primera página cuando se busca
+  };
+
+  // Debounce para la búsqueda (evitar demasiadas consultas)
+  const debouncedSearch = (e) => {
+    const value = e.target.value;
+    // Usar setTimeout para debounce
+    if (window.searchTimeout) {
+      clearTimeout(window.searchTimeout);
+    }
+    window.searchTimeout = setTimeout(() => {
+      setSearchTerm(value);
+      setCurrentPage(1);
+    }, 500); // 500ms delay
+  };
 
   // ==============================
   // Manejo de creación y edición
@@ -511,6 +559,7 @@ const ProductList = () => {
     if (selectedProducts.length === 0) return;
     
     if (window.confirm(`¿Estás seguro de eliminar ${selectedProducts.length} productos?`)) {
+      setLoading(true);
       try {
         // Eliminar imágenes asociadas
         await deleteImagesForProducts(selectedProducts);
@@ -527,14 +576,16 @@ const ProductList = () => {
           return;
         }
 
-        // Actualizar lista
-        setProducts(products.filter((product) => !selectedProducts.includes(product.id)));
+        // Recargar productos
+        await fetchProducts();
         setSelectedProducts([]);
         setMultiSelect(false);
         alert('Productos eliminados correctamente');
       } catch (error) {
         console.error('Error in delete process:', error);
         alert('Error en el proceso de eliminación');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -544,6 +595,7 @@ const ProductList = () => {
   // ==============================
   const handleDeleteProduct = async (id) => {
     if (window.confirm('¿Estás seguro de eliminar este producto?')) {
+      setLoading(true);
       try {
         // Eliminar imágenes asociadas
         await deleteImagesForProducts([id]);
@@ -555,11 +607,14 @@ const ProductList = () => {
           return;
         }
         
-        setProducts(products.filter((product) => product.id !== id));
+        // Recargar los productos en lugar de manipular el estado
+        await fetchProducts();
         alert('Producto eliminado correctamente');
       } catch (error) {
         console.error('Error in delete process:', error);
         alert('Error en el proceso de eliminación');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -627,25 +682,49 @@ const ProductList = () => {
     navigate('/login');
   };
 
-  // Pagination
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  
-  // Filter products based on search term
-  const filteredProducts = products.filter(product => 
-    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.batch?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  // Helper para calcular el total de páginas
+  const totalPages = Math.ceil(totalCount / productsPerPage);
 
   const getStockStatus = (stock) => {
     if (stock <= 0) return { class: 'outofstock', text: 'Sin Stock' };
     if (stock < 5) return { class: 'lowstock', text: 'Stock Bajo' };
     return { class: 'instock', text: 'Disponible' };
   };
+
+  // Componentes para estados de carga
+  const LoadingOverlay = () => (
+    <div style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+        <p style={{ marginTop: '10px' }}>Cargando...</p>
+      </div>
+    </div>
+  );
+
+  // Componente para error cuando no hay resultados
+  const NoResultsMessage = () => (
+    <tr>
+      <Td colSpan={multiSelect ? 11 : 10} style={{ textAlign: 'center' }}>
+        <EmptyState>
+          <h3>No hay productos para mostrar</h3>
+          <p>{searchTerm ? 'Intenta con otra búsqueda' : 'Agrega nuevos productos haciendo clic en "Crear Producto"'}</p>
+        </EmptyState>
+      </Td>
+    </tr>
+  );
 
   return (
     <Container>
@@ -682,8 +761,13 @@ const ProductList = () => {
         )}
 
         <FileInputContainer>
-          <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
-          <ActionButton onClick={handleUploadExcel} disabled={!excelFile}>
+          <input 
+            id="excel-upload"
+            type="file" 
+            accept=".xlsx, .xls" 
+            onChange={handleFileChange} 
+          />
+          <ActionButton onClick={handleUploadExcel} disabled={!excelFile || loading}>
             <Icons.FileUpload /> Importar Excel
           </ActionButton>
         </FileInputContainer>
@@ -691,15 +775,13 @@ const ProductList = () => {
         <SearchInput 
           type="text" 
           placeholder="Buscar productos..." 
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={debouncedSearch}
+          disabled={loading}
         />
       </ActionsContainer>
 
-      <TableContainer>
+      <TableContainer style={{ position: 'relative' }}>
+        {loading && <LoadingOverlay />}
         <Table>
           <thead>
             <tr>
@@ -717,8 +799,8 @@ const ProductList = () => {
             </tr>
           </thead>
           <tbody>
-            {currentProducts.length > 0 ? (
-              currentProducts.map((product) => {
+            {products.length > 0 ? (
+              products.map((product) => {
                 const stockStatus = getStockStatus(product.stock);
                 return (
                   <Tr 
@@ -774,35 +856,28 @@ const ProductList = () => {
                 );
               })
             ) : (
-              <tr>
-                <Td colSpan={multiSelect ? 11 : 10} style={{ textAlign: 'center' }}>
-                  <EmptyState>
-                    <h3>No hay productos para mostrar</h3>
-                    <p>{searchTerm ? 'Intenta con otra búsqueda' : 'Agrega nuevos productos haciendo clic en "Crear Producto"'}</p>
-                  </EmptyState>
-                </Td>
-              </tr>
+              <NoResultsMessage />
             )}
           </tbody>
         </Table>
       </TableContainer>
 
-      {filteredProducts.length > productsPerPage && (
+      {totalCount > 0 && (
         <Pagination>
           <PaginationButton 
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
+            disabled={currentPage === 1 || loading}
           >
             <Icons.ChevronLeft /> Anterior
           </PaginationButton>
           
           <PaginationInfo>
-            Página {currentPage} de {totalPages}
+            Página {currentPage} de {totalPages} (Total: {totalCount} productos)
           </PaginationInfo>
           
           <PaginationButton 
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || loading}
           >
             Siguiente <Icons.ChevronRight />
           </PaginationButton>
@@ -810,7 +885,12 @@ const ProductList = () => {
       )}
 
       {showCreateModal && (
-        <ProductCreateModal onClose={handleCloseCreateModal} refreshProducts={fetchProducts} />
+        <ProductCreateModal 
+          onClose={() => {
+            setShowCreateModal(false);
+            fetchProducts();
+          }} 
+        />
       )}
 
       {showEditModal && (
