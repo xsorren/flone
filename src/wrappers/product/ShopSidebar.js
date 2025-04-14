@@ -26,11 +26,6 @@ const ShopSidebar = ({ products, getSortParams, sideSpaceClass }) => {
         getSortParams={getSortParams}
       />
 
-      {/* filter by color */}
-      <ShopColor colors={uniqueColors} getSortParams={getSortParams} />
-
-      {/* filter by size */}
-      <ShopSize sizes={uniqueSizes} getSortParams={getSortParams} />
     </div>
   );
 };

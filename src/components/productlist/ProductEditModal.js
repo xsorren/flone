@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
 import { supabase } from '../../utils/supabaseClient';
+import axios from 'axios';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -228,66 +229,88 @@ const ProductEditModal = ({ product, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { error: updateError } = await supabase
-      .from('products')
-      .update({
-        code: formData.code,
-        batch: formData.batch,
-        name: formData.name,
-        stock: Number(formData.stock),
-        purchase_cost: parseFloat(formData.purchaseCost) || 0.0,
-        total_price: parseFloat(formData.totalPrice) || 0.0,
-        price: parseFloat(formData.price) || 0.0,
-        discount: Number(formData.discount),
-        short_description: formData.short_description,
-        affiliate_link: formData.affiliateLink,
-        category: formData.category.join(','),
-      })
-      .eq('id', product.id);
+    
+    try {
+      // Crea una copia del formData para no modificar el estado directamente
+      const productData = { ...formData };
+      
+      // Extraer imágenes si existen
+      const productImages = productData.images || [];
+      delete productData.images; // Elimina el campo images del objeto
+      
+      // Convierte category de array a string para guardarlo en la BD
+      if (Array.isArray(productData.category)) {
+        productData.category = productData.category.join(',');
+      }
+      
+      // Usar supabase en lugar de axios para actualizar el producto
+      const { data: savedProduct, error } = await supabase
+        .from('products')
+        .update({
+          code: productData.code,
+          batch: productData.batch,
+          name: productData.name,
+          stock: Number(productData.stock),
+          purchase_cost: parseFloat(productData.purchaseCost) || 0.0,
+          total_price: parseFloat(productData.totalPrice) || 0.0,
+          price: parseFloat(productData.price) || 0.0,
+          discount: Number(productData.discount),
+          short_description: productData.short_description,
+          affiliate_link: productData.affiliateLink,
+          category: productData.category,
+          // Agregar campos color y size si tienen valores
+          ...(productData.color && { color: productData.color }),
+          ...(productData.size && { size: productData.size }),
+        })
+        .eq('id', product.id)
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Manejar las imágenes nuevas si las hay
+      if (images && images.length > 0) {
+        for (const image of images) {
+          const filePath = `products/${product.id}/${image.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from('product-images')
+            .upload(filePath, image);
 
-    if (updateError) {
-      console.error(updateError);
-      toast.error('Error al actualizar el producto');
-      return;
-    }
+          if (uploadError) {
+            console.error('Error al subir imagen:', uploadError);
+            toast.error(`Error al subir imagen: ${image.name}`);
+            continue;
+          }
 
-    // Subir nuevas imágenes (opcional)
-    if (images.length > 0) {
-      for (const image of images) {
-        const filePath = `products/${product.id}/${image.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from('product-images')
-          .upload(filePath, image);
+          // Obtener URL pública
+          const { data: { publicUrl } } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(filePath);
 
-        if (uploadError) {
-          console.error(uploadError);
-          toast.error(`Error al subir la imagen ${image.name}`);
-          continue;
-        }
+          // Insertar registro en tabla images
+          const { error: imageInsertError } = await supabase
+            .from('images')
+            .insert({
+              product_id: product.id,
+              url: publicUrl,
+            });
 
-        // Obtener URL pública
-        const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(filePath);
-
-        // Insertar registro en la tabla images
-        const { data: insertedImages, error: imageInsertError } = await supabase
-          .from('images')
-          .insert({
-            product_id: product.id,
-            url: publicUrl
-          })
-          .select();
-
-        if (imageInsertError) {
-          console.error(imageInsertError);
-          toast.error('Error al guardar la imagen en la BD');
-        } else {
-          setCurrentImages([...currentImages, ...insertedImages]);
+          if (imageInsertError) {
+            console.error('Error al guardar imagen en BD:', imageInsertError);
+            toast.error('Error al guardar imagen en la base de datos');
+          }
         }
       }
+      
+      toast.success('Producto actualizado correctamente');
+      onClose();
+      
+    } catch (error) {
+      console.error('Error al actualizar el producto:', error);
+      toast.error('Error al actualizar el producto: ' + error.message);
     }
-
-    toast.success('Producto actualizado correctamente');
-    onClose();
   };
 
   const handleDeleteProduct = async () => {
@@ -322,6 +345,56 @@ const ProductEditModal = ({ product, onClose }) => {
     // Actualizar el state
     setCurrentImages(currentImages.filter(img => img.id !== imgId));
     toast.success('Imagen eliminada correctamente');
+  };
+
+  useEffect(() => {
+    if (product) {
+      // Convierte el string de categorías a array
+      const categoryArray = product.category ? 
+        product.category.split(',').map(cat => cat.trim()) : [];
+      
+      setFormData({
+        ...product,
+        category: categoryArray,
+        // otros campos...
+      });
+      
+      // Carga las imágenes del producto
+      const fetchProductImages = async () => {
+        try {
+          const response = await axios.get(`/api/images/product/${product.id}`);
+          // Añade las imágenes al estado del formulario
+          setFormData(prev => ({
+            ...prev,
+            images: response.data
+          }));
+        } catch (error) {
+          console.error('Error al cargar las imágenes:', error);
+        }
+      };
+      
+      fetchProductImages();
+    }
+  }, [product]);
+
+  // Función de utilidad que puedes añadir para garantizar consistencia
+  const ensureCategoryFormat = (categoryValue) => {
+    if (typeof categoryValue === 'string') {
+      return categoryValue.split(',').map(cat => cat.trim());
+    }
+    if (Array.isArray(categoryValue)) {
+      return categoryValue;
+    }
+    return []; // Por defecto, devuelve un array vacío
+  };
+
+  // Puedes usar esta función cuando cambies el valor de category
+  // Por ejemplo, en un onChange handler:
+  const handleCategoryChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      category: ensureCategoryFormat(value)
+    }));
   };
 
   return (

@@ -135,7 +135,10 @@ const ProductGridSingleTen = ({
               <div className="product-price">
                 <span>
                   {currencySymbol}
-                  {finalProductPrice.toFixed(2)}
+                  {new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  }).format(finalProductPrice)}
                 </span>
               </div>
             )}
