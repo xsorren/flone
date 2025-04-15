@@ -16,6 +16,14 @@ const ProductDescriptionInfo = ({
 }) => {
   const dispatch = useDispatch();
 
+  // Función para formatear precios con separadores de miles y sin centavos
+  const formatPrice = (price) => {
+    // Convertir a entero eliminando los decimales
+    const priceInt = Math.floor(parseFloat(price));
+    // Aplicar separador de miles
+    return priceInt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   const hasVariation =
     product.variation &&
     Array.isArray(product.variation) &&
@@ -55,7 +63,7 @@ const ProductDescriptionInfo = ({
         <div className="pro-details-price">
           <span>
             {currencySymbol}
-            {finalProductPrice.toFixed(2)}
+            {formatPrice(finalProductPrice)}
           </span>
         </div>
       )}
@@ -69,12 +77,14 @@ const ProductDescriptionInfo = ({
         </div>
       ) : null}
 
-      {/* Descripción corta */}
-      {product.short_description && (
-        <div className="pro-details-list">
+      {/* Descripción corta o texto por defecto */}
+      <div className="pro-details-list">
+        {product.short_description ? (
           <p>{product.short_description}</p>
-        </div>
-      )}
+        ) : (
+          <p className="text-muted">Este producto no tiene una descripción disponible. Contáctenos para más información.</p>
+        )}
+      </div>
 
       {/* Variaciones (color, tamaño) si existen */}
       {hasVariation && (

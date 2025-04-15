@@ -6,6 +6,44 @@ import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Swiper, { SwiperSlide } from "../../components/swiper";
+import styled from "styled-components";
+
+// Estilos personalizados para las imágenes
+const ProductImageContainer = styled.div`
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-height: 600px; /* Altura máxima para la imagen del producto */
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Mantiene la relación de aspecto dentro del contenedor */
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover img {
+    transform: scale(1.05);
+  }
+`;
+
+const ProductThumbnailContainer = styled.div`
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 120px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover img {
+    transform: scale(1.1);
+  }
+`;
 
 const ProductImageGallery = ({ product }) => {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -63,19 +101,13 @@ const ProductImageGallery = ({ product }) => {
           <Swiper options={gallerySwiperParams}>
             {product.images.map((single, key) => (
               <SwiperSlide key={key}>
-                <button
-                  className="lightgallery-button"
-                  onClick={() => setIndex(key)}
-                >
-                  <i className="pe-7S-expand1" />
-                </button>
-                <div className="single-image">
+                <ProductImageContainer>
                   <img
                     src={process.env.PUBLIC_URL + single.url}
                     className="img-fluid"
                     alt={product.name || "No disponible"}
                   />
-                </div>
+                </ProductImageContainer>
               </SwiperSlide>
             ))}
             {/* Lightbox para ver imágenes en grande */}
@@ -89,13 +121,15 @@ const ProductImageGallery = ({ product }) => {
           </Swiper>
         ) : (
           // Si NO hay imágenes, mostrar la imagen "no-imagen"
-          <div className="single-image">
-            <img
-              src={process.env.PUBLIC_URL + "/assets/img/no-imagen.png"}
-              className="img-fluid"
-              alt={product.name || "No disponible"}
-            />
-          </div>
+          <SwiperSlide>
+            <ProductImageContainer>
+              <img
+                src={process.env.PUBLIC_URL + "/assets/img/no-imagen.png"}
+                className="img-fluid"
+                alt={product.name || "No disponible"}
+              />
+            </ProductImageContainer>
+          </SwiperSlide>
         )}
       </div>
 
@@ -105,13 +139,13 @@ const ProductImageGallery = ({ product }) => {
           <Swiper options={thumbnailSwiperParams}>
             {product.images.map((single, key) => (
               <SwiperSlide key={key}>
-                <div className="single-image">
+                <ProductThumbnailContainer>
                   <img
                     src={process.env.PUBLIC_URL + single.url}
                     className="img-fluid"
                     alt={product.name || "No disponible"}
                   />
-                </div>
+                </ProductThumbnailContainer>
               </SwiperSlide>
             ))}
           </Swiper>

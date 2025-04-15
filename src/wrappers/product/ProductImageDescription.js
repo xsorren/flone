@@ -5,16 +5,12 @@ import ProductImageGallery from "../../components/product/ProductImageGallery";
 import ProductDescriptionInfo from "../../components/product/ProductDescriptionInfo";
 import ProductImageGallerySideThumb from "../../components/product/ProductImageGallerySideThumb";
 import ProductImageFixed from "../../components/product/ProductImageFixed";
-import { useEffect } from "react";
 
 const ProductImageDescription = ({ spaceTopClass, spaceBottomClass, galleryType, product }) => {
   const { cartItems } = useSelector((state) => state.cart);
   const { wishlistItems } = useSelector((state) => state.wishlist);
   const wishlistItem = wishlistItems.find(item => item.id === product.id);
-  useEffect(() => {
-    console.log(product);
-  }
-  , []);
+
   return (
     <div className={clsx("shop-area", spaceTopClass, spaceBottomClass)}>
       <div className="container">

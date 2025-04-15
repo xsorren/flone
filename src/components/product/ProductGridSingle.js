@@ -11,23 +11,25 @@ import { addToCart } from "../../store/slices/cart-slice";
 import { addToWishlist } from "../../store/slices/wishlist-slice";
 import styled from "styled-components";
 
+// Contenedor principal de la imagen con altura fija
 const ProductImageContainer = styled.div`
   position: relative;
   overflow: hidden;
   width: 100%;
-  height: 400px; /* Ajusta la altura según lo que desees */
+  height: 400px; /* Altura fija para todas las tarjetas */
   
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover; 
-    transition: transform 0.3s ease;
+    object-fit: cover;
+    transition: transform 0.5s ease-in-out;
   }
-
+  
   &:hover img {
     transform: scale(1.1);
   }
 `;
+
 const ProductGridSingle = ({
   product,
   currency,
@@ -37,14 +39,27 @@ const ProductGridSingle = ({
 }) => {
   const [modalShow, setModalShow] = useState(false);
 
+  // Función para formatear precios con separadores de miles y sin centavos
+  const formatPrice = (price) => {
+    // Convertir a entero eliminando los decimales
+    const priceInt = Math.floor(parseFloat(price));
+    // Aplicar separador de miles
+    return priceInt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   // Calcula el precio con descuento
   const discountedPrice = getDiscountPrice(product.price, product.discount);
-  const finalProductPrice = +(product.price * currency.currencyRate).toFixed(2);
+  const finalProductPrice = product.price * currency.currencyRate;
   const finalDiscountedPrice = discountedPrice
-    ? +(discountedPrice * currency.currencyRate).toFixed(2)
+    ? discountedPrice * currency.currencyRate
     : null;
 
   const dispatch = useDispatch();
+
+  // Determinar la URL de la imagen (solo usamos la primera imagen)
+  const imageUrl = product.images && product.images.length > 0
+    ? process.env.PUBLIC_URL + product.images[0].url
+    : process.env.PUBLIC_URL + "/assets/img/no-imagen.png";
 
   return (
     <Fragment>
@@ -52,37 +67,14 @@ const ProductGridSingle = ({
         <div className="product-img">
           <Link to={process.env.PUBLIC_URL + "/product/" + product.id}>
             <ProductImageContainer>
-              {/* Imagen principal */}
-              {product.images && product.images.length > 0 ? (
-                <img
-                  className="default-img"
-                  src={
-                    process.env.PUBLIC_URL +
-                    (product.images[0].url || "/assets/img/no-imagen.png")
-                  }
-                  alt={product.name || ""}
-                />
-              ) : (
-                <img
-                  className="default-img"
-                  src={process.env.PUBLIC_URL + "/assets/img/no-imagen.png"}
-                  alt={product.name || ""}
-                />
-              )}
+              <img
+                src={imageUrl}
+                alt={product.name || "Producto"}
+              />
             </ProductImageContainer>
-
-            {/* Hover image */}
-            {product.images && product.images.length > 1 && (
-              <ProductImageContainer>
-                <img
-                  className="hover-img"
-                  src={process.env.PUBLIC_URL + product.images[1].url}
-                  alt={product.name || ""}
-                />
-              </ProductImageContainer>
-            )}
           </Link>
-          {/* badgets: descuento, nuevo, etc. */}
+          
+          {/* Badges: descuento, nuevo, etc. */}
           {(product.discount || product.new) && (
             <div className="product-img-badges">
               {product.discount && <span className="pink">-{product.discount}%</span>}
@@ -159,13 +151,13 @@ const ProductGridSingle = ({
           <div className="product-price">
             {finalDiscountedPrice !== null ? (
               <>
-                <span>{currency.currencySymbol + finalDiscountedPrice}</span>{" "}
+                <span>{currency.currencySymbol + formatPrice(finalDiscountedPrice)}</span>{" "}
                 <span className="old">
-                  {currency.currencySymbol + finalProductPrice}
+                  {currency.currencySymbol + formatPrice(finalProductPrice)}
                 </span>
               </>
             ) : (
-              <span>{currency.currencySymbol + finalProductPrice}</span>
+              <span>{currency.currencySymbol + formatPrice(finalProductPrice)}</span>
             )}
           </div>
         </div>
