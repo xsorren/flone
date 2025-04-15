@@ -175,12 +175,38 @@ export const getIndividualSizes = product => {
 };
 
 export const setActiveSort = e => {
-  const filterButtons = document.querySelectorAll(
-    ".sidebar-widget-list-left button, .sidebar-widget-tag button, .product-filter button"
-  );
-  filterButtons.forEach(item => {
-    item.classList.remove("active");
-  });
+  // Si se trata de un botón de categoría, no eliminamos la clase active de otros botones de categoría
+  if (e.currentTarget.closest('.sidebar-widget').querySelector('.pro-sidebar-title').textContent.trim() === "Categorías") {
+    // Solo eliminar active de otros tipos de filtros, no de categorías
+    const filterButtons = document.querySelectorAll(
+      ".product-filter button"
+    );
+    filterButtons.forEach(item => {
+      item.classList.remove("active");
+    });
+    
+    // Toggle para el botón actual (solo para otras categorías de filtro)
+    if (!e.currentTarget.textContent.includes("Todas las categorías")) {
+      return; // No hacemos nada, ya que esto se maneja en el componente ShopCategories
+    }
+    
+    // Para "Todas las categorías", desactivamos todos los botones de categoría
+    const categoryButtons = document.querySelectorAll(
+      ".sidebar-widget-list-left button"
+    );
+    categoryButtons.forEach(item => {
+      item.classList.remove("active");
+    });
+  } else {
+    // Comportamiento normal para otros filtros
+    const filterButtons = document.querySelectorAll(
+      ".sidebar-widget-list-left button, .sidebar-widget-tag button, .product-filter button"
+    );
+    filterButtons.forEach(item => {
+      item.classList.remove("active");
+    });
+  }
+  
   e.currentTarget.classList.add("active");
 };
 

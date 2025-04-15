@@ -14,6 +14,14 @@ const MenuCart = () => {
   const { cartItems } = useSelector((state) => state.cart);
   let cartTotalPrice = 0;
 
+  // Función para formatear precios con separadores de miles y sin centavos
+  const formatPrice = (price) => {
+    // Convertir a entero eliminando los decimales
+    const priceInt = Math.floor(parseFloat(price));
+    // Aplicar separador de miles
+    return priceInt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   return (
     <div className="shopping-cart-content">
       {cartItems && cartItems.length > 0 ? (
@@ -63,8 +71,8 @@ const MenuCart = () => {
                     <h6>Qty: {item.quantity}</h6>
                     <span>
                       {discountedPrice !== null
-                        ? currency.currencySymbol + finalDiscountedPrice
-                        : currency.currencySymbol + finalProductPrice}
+                        ? currency.currencySymbol + formatPrice(finalDiscountedPrice)
+                        : currency.currencySymbol + formatPrice(finalProductPrice)}
                     </span>
                     {item.selectedProductColor &&
                     item.selectedProductSize ? (
@@ -91,7 +99,7 @@ const MenuCart = () => {
             <h4>
               Total :{" "}
               <span className="shop-total">
-                {currency.currencySymbol + cartTotalPrice.toFixed(2)}
+                {currency.currencySymbol + formatPrice(cartTotalPrice)}
               </span>
             </h4>
           </div>

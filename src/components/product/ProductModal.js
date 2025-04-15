@@ -130,6 +130,14 @@ function ProductModal({ product, show, onHide, wishlistItem, currency }) {
     onHide();
   };
 
+  // Función para formatear precios con separadores de miles y sin centavos
+  const formatPrice = (price) => {
+    // Convertir a entero eliminando los decimales
+    const priceInt = Math.floor(parseFloat(price));
+    // Aplicar separador de miles
+    return priceInt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   return (
     <Modal
       show={show}
@@ -214,17 +222,17 @@ function ProductModal({ product, show, onHide, wishlistItem, currency }) {
                   <Fragment>
                     <span>
                       {currencySymbol}
-                      {finalDiscountedPrice.toFixed(2)}
+                      {formatPrice(finalDiscountedPrice)}
                     </span>{" "}
                     <span className="old">
                       {currencySymbol}
-                      {finalProductPrice.toFixed(2)}
+                      {formatPrice(finalProductPrice)}
                     </span>
                   </Fragment>
                 ) : (
                   <span>
                     {currencySymbol}
-                    {finalProductPrice.toFixed(2)}
+                    {formatPrice(finalProductPrice)}
                   </span>
                 )}
               </div>

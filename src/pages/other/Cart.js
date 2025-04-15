@@ -21,6 +21,14 @@ const Cart = () => {
     currencyRate: 1
   }  
   const { cartItems } = useSelector((state) => state.cart);
+  
+  // Función para formatear precios con separadores de miles y sin centavos
+  const formatPrice = (price) => {
+    // Convertir a entero eliminando los decimales
+    const priceInt = Math.floor(parseFloat(price));
+    // Aplicar separador de miles
+    return priceInt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
 
   return (
     <Fragment>
@@ -132,17 +140,17 @@ const Cart = () => {
                                     <Fragment>
                                       <span className="amount old">
                                         {currency.currencySymbol +
-                                          finalProductPrice}
+                                          formatPrice(finalProductPrice)}
                                       </span>
                                       <span className="amount">
                                         {currency.currencySymbol +
-                                          finalDiscountedPrice}
+                                          formatPrice(finalDiscountedPrice)}
                                       </span>
                                     </Fragment>
                                   ) : (
                                     <span className="amount">
                                       {currency.currencySymbol +
-                                        finalProductPrice}
+                                        formatPrice(finalProductPrice)}
                                     </span>
                                   )}
                                 </td>
@@ -189,13 +197,9 @@ const Cart = () => {
                                 <td className="product-subtotal">
                                   {discountedPrice !== null
                                     ? currency.currencySymbol +
-                                      (
-                                        finalDiscountedPrice * cartItem.quantity
-                                      ).toFixed(2)
+                                      formatPrice(finalDiscountedPrice * cartItem.quantity)
                                     : currency.currencySymbol +
-                                      (
-                                        finalProductPrice * cartItem.quantity
-                                      ).toFixed(2)}
+                                      formatPrice(finalProductPrice * cartItem.quantity)}
                                 </td>
 
                                 <td className="product-remove">
@@ -245,14 +249,14 @@ const Cart = () => {
                       <h5>
                         Total de productos{" "}
                         <span>
-                          {currency.currencySymbol + cartTotalPrice.toFixed(2)}
+                          {currency.currencySymbol + formatPrice(cartTotalPrice)}
                         </span>
                       </h5>
 
                       <h4 className="grand-totall-title">
                         Gran Total{" "}
                         <span>
-                          {currency.currencySymbol + cartTotalPrice.toFixed(2)}
+                          {currency.currencySymbol + formatPrice(cartTotalPrice)}
                         </span>
                       </h4>
                       <Link to={process.env.PUBLIC_URL + "/checkout"}>

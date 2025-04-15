@@ -1607,203 +1607,6 @@
   &:hover .product-action-2 button {
     // Eliminar reglas de hover
   }
-  &.pro-glaucous-color {
-    .product-img {
-      span.glaucous {
-        color: #3d6882;
-      }
-      .product-action-2 {
-        a,
-        button {
-          background-color: #3d6882;
-          &:hover,
-          &.active {
-            color: #000;
-            background-color: #fff;
-          }
-        }
-      }
-    }
-    .product-content-2 {
-      .pro-wishlist-2 a:hover {
-        color: #3d6882;
-      }
-      .title-price-wrap-2 {
-        h3 a:hover {
-          color: #3d6882;
-        }
-        .price-2 {
-          span.old {
-            color: #3d6882;
-          }
-        }
-      }
-    }
-  }
-
-  &.pro-puce-color {
-    .product-img {
-      span.puce {
-        color: #de3e3e;
-      }
-      .product-action-2 {
-        a,
-        button {
-          background-color: #de3e3e;
-          &:hover {
-            color: #000;
-            background-color: #fff;
-          }
-        }
-      }
-    }
-    .product-content-2 {
-      .pro-wishlist-2 a:hover,
-      .pro-wishlist-2 button:hover {
-        color: #de3e3e;
-      }
-      .title-price-wrap-2 {
-        h3 a:hover {
-          color: #de3e3e;
-        }
-        .price-2 {
-          span.old {
-            color: #de3e3e;
-          }
-        }
-      }
-    }
-  }
-}
-
-
-/* product hm3 */
-
-.section-padding-1 .container-fluid {
-  padding: 0 70px;
-  @media #{$xl-layout} {
-    padding: 0 15px;
-  }
-  @media #{$lg-layout} {
-    padding: 0 30px;
-  }
-  @media #{$md-layout} {
-    padding: 0 40px;
-  }
-  @media #{$xs-layout} {
-    padding: 0 15px;
-  }
-}
-
-
-/* product hm4 */
-
-.hm4-section-padding .container-fluid {
-  padding: 0 70px;
-  @media #{$xx-layout} {
-    padding: 0 60px;
-  }
-  @media #{$xl-layout} {
-    padding: 0 30px;
-  }
-  @media #{$lg-layout} {
-    padding: 0 15px;
-  }
-  @media #{$md-layout} {
-    padding: 0 30px;
-  }
-  @media #{$xs-layout} {
-    padding: 0 15px;
-  }
-}
-.toggle-item-active,
-.toggle-item-active2,
-.toggle-item-active3,
-.toggle-item-active4,
-.toggle-item-active5,
-.toggle-item-active6 {
-  display: none;
-}
-
-.view-more {
-  display: block;
-
-  width: 100%;
-
-  text-align: center;
-  a {
-    font-weight: 500;
-    line-height: 1;
-
-    display: inline-block;
-
-    padding-bottom: 2px;
-
-    text-align: center;
-
-    color: #555;
-    border-bottom: 1px solid #cccccc;
-    &:hover {
-      color: $theme-color;
-      border-bottom: 1px solid $theme-color;
-    }
-  }
-  @media #{$xs-layout} {
-    &.mt-20 {
-      margin-top: 0;
-    }
-  }
-
-  &.round-btn {
-    a {
-      font-size: 16px;
-      line-height: 1;
-
-      display: inline-block;
-
-      padding: 16px 40px 16px 40px;
-
-      text-transform: capitalize;
-
-      color: #fff;
-      border-radius: 34px 34px 34px 34px;
-      background-color: #c61a32;
-
-      &:hover {
-        background-color: $theme-color;
-      }
-    }
-  }
-}
-
-
-/* product hm5 */
-
-.hm5-section-padding {
-  .container-fluid {
-    padding-right: 0;
-    padding-left: 0;
-    @media #{$xs-layout} {
-      padding-right: 15px;
-      padding-left: 15px;
-    }
-  }
-  .row {
-    margin-right: -10px;
-    margin-left: -10px;
-    @media #{$xs-layout} {
-      margin-right: -15px;
-      margin-left: -15px;
-    }
-  }
-  div[class^="col-"] {
-    padding-right: 10px;
-    padding-left: 10px;
-    @media #{$xs-layout} {
-      padding-right: 15px;
-      padding-left: 15px;
-    }
-  }
 }
 
 .product-wrap-3 {
@@ -3233,10 +3036,26 @@
     }
   }
   &:hover .hover-img {
-    // Eliminar reglas de hover
+    visibility: visible;
+    transform: none;
+    opacity: 1;
   }
+  
   &:hover .default-img {
-    // Eliminar reglas de hover
+    transform: none; 
+  }
+  
+  &:hover .product-action-2 {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  &:hover .product-action-2 a {
+    transform: scale(1);
+  }
+  
+  &:hover .product-action-2 button {
+    transform: scale(1);
   }
   &:hover .product-action-2 a {
     // Eliminar reglas de hover

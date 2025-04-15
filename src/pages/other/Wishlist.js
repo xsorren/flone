@@ -16,10 +16,17 @@ const Wishlist = () => {
     currencySymbol: "$",
     currencyName: "USD",
     currencyRate: 1
-}
+  }
   const { wishlistItems } = useSelector((state) => state.wishlist);
   const { cartItems } = useSelector((state) => state.cart);
   
+  // Función para formatear precios con separadores de miles y sin centavos
+  const formatPrice = (price) => {
+    // Convertir a entero eliminando los decimales
+    const priceInt = Math.floor(parseFloat(price));
+    // Aplicar separador de miles
+    return priceInt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
 
   return (
     <Fragment>
@@ -108,17 +115,17 @@ const Wishlist = () => {
                                     <Fragment>
                                       <span className="amount old">
                                         {currency.currencySymbol +
-                                          finalProductPrice}
+                                          formatPrice(parseFloat(finalProductPrice))}
                                       </span>
                                       <span className="amount">
                                         {currency.currencySymbol +
-                                          finalDiscountedPrice}
+                                          formatPrice(parseFloat(finalDiscountedPrice))}
                                       </span>
                                     </Fragment>
                                   ) : (
                                     <span className="amount">
                                       {currency.currencySymbol +
-                                        finalProductPrice}
+                                        formatPrice(parseFloat(finalProductPrice))}
                                     </span>
                                   )}
                                 </td>

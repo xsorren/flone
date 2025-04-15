@@ -44,6 +44,14 @@ const Checkout = ({ isPresupuesto = false }) => {
     currencyRate: 1
   };
 
+  // Función para formatear precios con separadores de miles y sin centavos
+  const formatPrice = (price) => {
+    // Convertir a entero eliminando los decimales
+    const priceInt = Math.floor(parseFloat(price));
+    // Aplicar separador de miles
+    return priceInt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCustomerData({
@@ -78,7 +86,7 @@ const Checkout = ({ isPresupuesto = false }) => {
       const discountedPrice = getDiscountPrice(item.price, item.discount);
       const finalPrice = discountedPrice || item.price;
       
-      return `${item.name} x ${item.quantity} - $${(finalPrice * item.quantity).toFixed(2)}`;
+      return `${item.name} x ${item.quantity} - $${Math.floor(finalPrice * item.quantity)}`;
     }).join('\n');
 
     // Agrupar toda la información para EmailJS
@@ -90,7 +98,7 @@ const Checkout = ({ isPresupuesto = false }) => {
       customer_location: `${customerData.city}, ${customerData.state} (${customerData.zip})`,
       customer_company: customerData.company || 'No especificada',
       order_items: cartSummary,
-      order_total: `$${cartTotalPrice.toFixed(2)}`,
+      order_total: `$${formatPrice(cartTotalPrice)}`,
       customer_notes: customerData.notes || 'Sin notas adicionales',
       order_type: isPresupuesto ? 'Solicitud de Presupuesto' : 'Pedido de Compra'
     };
@@ -362,15 +370,9 @@ const Checkout = ({ isPresupuesto = false }) => {
                                       <span className="order-price">
                                         {discountedPrice !== null
                                           ? currency.currencySymbol +
-                                            (
-                                              finalDiscountedPrice *
-                                              cartItem.quantity
-                                            ).toFixed(2)
+                                            formatPrice(finalDiscountedPrice * cartItem.quantity)
                                           : currency.currencySymbol +
-                                            (
-                                              finalProductPrice *
-                                              cartItem.quantity
-                                            ).toFixed(2)}
+                                            formatPrice(finalProductPrice * cartItem.quantity)}
                                       </span>
                                     )}
                                   </li>
@@ -391,8 +393,7 @@ const Checkout = ({ isPresupuesto = false }) => {
                                 <ul>
                                   <li className="order-total">Total</li>
                                   <li>
-                                    {currency.currencySymbol +
-                                      cartTotalPrice.toFixed(2)}
+                                    {currency.currencySymbol + formatPrice(cartTotalPrice)}
                                   </li>
                                 </ul>
                               </div>

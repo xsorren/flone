@@ -71,10 +71,32 @@ const ShopGridStandard = () => {
         
         // Actualizar URL con los parámetros
         const params = new URLSearchParams(search);
-        if (sortValue) {
-            params.set(sortType, sortValue);
+        
+        // Manejo especial para categorías (permitir múltiples)
+        if (sortType === 'category') {
+            // Si se seleccionó "Todas las categorías", eliminar todos los filtros de categoría
+            if (sortValue === "") {
+                params.delete('category');
+            } else {
+                let categories = params.getAll('category');
+                
+                if (categories.includes(sortValue)) {
+                    // Si la categoría ya está seleccionada, eliminarla (toggle)
+                    categories = categories.filter(cat => cat !== sortValue);
+                    params.delete('category');
+                    categories.forEach(cat => params.append('category', cat));
+                } else {
+                    // Agregar nueva categoría a la selección
+                    params.append('category', sortValue);
+                }
+            }
         } else {
-            params.delete(sortType);
+            // Para otros tipos de filtros, comportamiento normal
+            if (sortValue) {
+                params.set(sortType, sortValue);
+            } else {
+                params.delete(sortType);
+            }
         }
         
         // Actualizar URL sin recargar
@@ -121,7 +143,7 @@ const ShopGridStandard = () => {
                 
             // Aplicar filtros desde la URL
             const search = searchParams.get('search');
-            const category = searchParams.get('category');
+            const categories = searchParams.getAll('category');
             const color = searchParams.get('color');
             const size = searchParams.get('size');
             
@@ -130,19 +152,21 @@ const ShopGridStandard = () => {
                 query = query.or(`name.ilike.%${search}%,code.ilike.%${search}%,short_description.ilike.%${search}%`);
             }
             
-            // Filtro por categoría
-            if (category) {
-                query = query.ilike('category', `%${category}%`);
+            // Filtro por categorías (múltiples)
+            if (categories && categories.length > 0) {
+                // Creamos un filtro OR para buscar cualquiera de las categorías seleccionadas
+                const categoryFilters = categories.map(cat => `category.eq.${cat}`);
+                query = query.or(categoryFilters.join(','));
             }
             
             // Filtro por color
             if (color) {
-                query = query.ilike('color', `%${color}%`);
+                query = query.eq('color', color);
             }
             
             // Filtro por tamaño
             if (size) {
-                query = query.ilike('size', `%${size}%`);
+                query = query.eq('size', size);
             }
             
             // Ordenamiento
@@ -192,10 +216,8 @@ const ShopGridStandard = () => {
         const params = new URLSearchParams(search);
         
         // Establecer filtros iniciales desde URL
-        if (params.get('category')) {
-            setSortType('category');
-            setSortValue(params.get('category'));
-        }
+        // No necesitamos inicializar categorías aquí porque
+        // serán gestionadas por los componentes de categoría
         
         if (params.get('color')) {
             setSortType('color');
