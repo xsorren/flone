@@ -372,6 +372,7 @@ const ProductList = () => {
 
   // Para manejar el archivo Excel
   const [excelFile, setExcelFile] = useState(null);
+  const [updateExcelFile, setUpdateExcelFile] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -774,6 +775,138 @@ const ProductList = () => {
     </tr>
   );
 
+  // Agrega esta nueva función para manejar la actualización de productos
+  const handleUpdateFromExcel = async () => {
+    if (!updateExcelFile) return;
+
+    setLoading(true);
+    try {
+      // Leer el archivo como ArrayBuffer
+      const data = await updateExcelFile.arrayBuffer();
+      // Parsear con SheetJS
+      const workbook = XLSX.read(data);
+      // Tomar la primera hoja
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      // Convertir a JSON
+      const excelData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Log para diagnóstico
+      console.log("Primera fila del Excel de actualización:", excelData[0]);
+
+      // Mapeo de datos Excel a estructura de tabla igual que en la carga
+      const mappedData = excelData.map((row) => {
+        const parseNumeric = (val) => {
+          if (!val && val !== 0) return 0.0;
+          
+          // Convertir a string si es un número
+          const strVal = val.toString().trim();
+          
+          // Mismo procesamiento que en la función de carga
+          if (strVal.includes(',') && !strVal.includes('.')) {
+            return parseFloat(strVal.replace(',', '.')) || 0.0;
+          }
+          
+          if (strVal.includes('.') && !strVal.includes(',')) {
+            return parseFloat(strVal) || 0.0;
+          }
+          
+          if (strVal.includes('.') && strVal.includes(',')) {
+            return parseFloat(strVal.replace(/\./g, '').replace(',', '.')) || 0.0;
+          }
+          
+          return parseFloat(strVal) || 0.0;
+        };
+
+        // Crear el objeto mapeado con la misma estructura que en la carga
+        // Es importante incluir 'code' para hacer el match
+        return {
+          code: row['Codigo']?.toString() ?? '',
+          batch: row['Lote']?.toString() ?? '',
+          name: row['Articulo'] ?? '',
+          stock: parseInt(row['Stock']) || 0,
+          purchase_cost: parseNumeric(row['Costo Compra']),
+          total_price: parseNumeric(row['Precio Total']),
+          price: parseNumeric(row['Precio Venta']),
+          category: row['Categoria']?.toString() ?? '',
+          short_description: row['Descripcion']?.toString() ?? '',
+          discount: parseNumeric(row['Descuento']) || 0,
+          rating: parseNumeric(row['Rating']) || 0,
+          affiliate_link: row['Affiliate Link']?.toString() ?? '',
+          color: row['Color']?.toString() ?? '',
+          size: row['Tamaño']?.toString() ?? '',
+        };
+      });
+      
+      // Log para diagnóstico
+      console.log("Datos mapeados para actualización (primeros 2):", mappedData.slice(0, 2));
+
+      // Actualizar cada producto que coincida por código
+      let updatedCount = 0;
+      let errorCount = 0;
+      
+      for (const product of mappedData) {
+        // No podemos procesar filas sin código
+        if (!product.code) {
+          console.warn("Fila sin código encontrada, saltando...");
+          continue;
+        }
+        
+        // Buscar el producto por código
+        const { data: existingProducts, error: searchError } = await supabase
+          .from('products')
+          .select('id')
+          .eq('code', product.code);
+        
+        if (searchError) {
+          console.error(`Error al buscar producto con código ${product.code}:`, searchError);
+          errorCount++;
+          continue;
+        }
+        
+        // Si no existe el producto, lo saltamos
+        if (!existingProducts || existingProducts.length === 0) {
+          console.warn(`No se encontró producto con código ${product.code}, saltando...`);
+          continue;
+        }
+        
+        // Si hay más de un producto con el mismo código, actualizamos el primero y advertimos
+        if (existingProducts.length > 1) {
+          console.warn(`Se encontraron ${existingProducts.length} productos con código ${product.code}, actualizando solo el primero`);
+        }
+        
+        // Actualizar el producto encontrado
+        const productId = existingProducts[0].id;
+        const { error: updateError } = await supabase
+          .from('products')
+          .update(product)
+          .eq('id', productId);
+        
+        if (updateError) {
+          console.error(`Error al actualizar producto con ID ${productId}:`, updateError);
+          errorCount++;
+        } else {
+          updatedCount++;
+        }
+      }
+      
+      // Notificar al usuario
+      alert(`Actualización completada: ${updatedCount} productos actualizados, ${errorCount} errores.`);
+      
+      // Reset el input de archivo
+      setUpdateExcelFile(null);
+      document.getElementById('excel-update').value = '';
+      
+      // Recargar los productos
+      await fetchProducts();
+      
+    } catch (err) {
+      console.error('Error al procesar el Excel para actualización:', err);
+      alert('Error al procesar el archivo Excel para actualización: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Container>
       <PageHeader>
@@ -817,6 +950,22 @@ const ProductList = () => {
           />
           <ActionButton onClick={handleUploadExcel} disabled={!excelFile || loading}>
             <Icons.FileUpload /> Importar Excel
+          </ActionButton>
+        </FileInputContainer>
+
+        <FileInputContainer>
+          <input 
+            id="excel-update"
+            type="file" 
+            accept=".xlsx, .xls" 
+            onChange={(e) => setUpdateExcelFile(e.target.files[0])} 
+          />
+          <ActionButton 
+            onClick={handleUpdateFromExcel} 
+            disabled={!updateExcelFile || loading}
+            style={{ backgroundColor: '#ff9800' }} // Color naranja para diferenciar
+          >
+            <Icons.FileUpload /> Actualizar desde Excel
           </ActionButton>
         </FileInputContainer>
 
